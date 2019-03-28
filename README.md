@@ -1,5 +1,9 @@
 # Keycloak Kafka Module
-Simple module for keycloak to produce events to kafka.
+Simple module for [Keycloak](https://www.keycloak.org/) to produce JSON events to [Kafka](https://kafka.apache.org/) when a `REGISTER` event in Keycloak was triggered.
+The payload of the kafka event looks like:
+
+`{"userId":"f3e3988a-63eb-49c6-932f-482f37cae74e","email":"testi@mctestface.com"}`
+
 
 Tested with 
 
@@ -7,27 +11,28 @@ Kafka version: `2.12-2.1.0`
  
 Keycloak version: `4.8.3`
 
-Java version: 11
+Java version: `11`
 
 
 ## Installation
 
 Add a new provider in `standalone.xml` under `<subsystem xmlns="urn:jboss:domain:keycloak-server:1.1">`.
 
-```
+```xml
             <providers>
                 <provider>classpath:${jboss.home.dir}/providers/*</provider>
                 <provider>module:ai.atlaslabs.keycloak.keycloak-kafka</provider>
             </providers>
 ```
 
+
 Create a new folder in `$KEYCLOAK_HOME/modules/system/layers/keycloak/ai/atlaslabs/keycloak/keycloak-kafka/main`
 
-Copy `kafka-1.0.0.jar` into the `main` folder and create a new file `module.xml` with the following content:
+Copy `keycloak-kafka-1.0.0.jar` into the `main` folder and create a new file `module.xml` with the following content:
 
 ```xml
 <?xml version="1.0" ?>
-<module xmlns="urn:jboss:module:1.3" name="ai.atlaslabs.keycloak.kafka">
+<module xmlns="urn:jboss:module:1.3" name="ai.atlaslabs.keycloak.keycloak-kafka">
  <resources>
   <resource-root path="keycloak-kafka-1.0.0.jar" />
  </resources>
@@ -60,7 +65,7 @@ and create a new file `module.xml`.
 </module>
 ```
 
-Download the .jar files listed under `<resources>` from https://mvnrepository.com/ and put them into the same folder.
+Download the .jar files listed under `<resources>` from [MVN Repository](https://mvnrepository.com/) and put them into the same folder.
 
 ```
 .
@@ -96,8 +101,7 @@ Add the following content to your `standalone.xml`:
 ```
 
 `topic`: The name of the kafka topic to where the events will be produced to.
+
 `clientId`: The `client.id` used to identify the client in kafka.
+
 `bootstrapServer`: A comma separated list of available brokers.
-
-
-
