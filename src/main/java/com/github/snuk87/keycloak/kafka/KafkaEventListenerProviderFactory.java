@@ -39,7 +39,9 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		topic = config.get("topic");
 		clientId = config.get("clientId", "keycloak");
 		bootstrapServers = config.get("bootstrapServers");
-		events = config.getArray("events");
+
+		String eventsString = config.get("events");
+		events = eventsString.split(",");
 
 		if (topic == null) {
 			throw new NullPointerException("topic must not be null.");
@@ -53,7 +55,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 			throw new NullPointerException("bootstrapServers must not be null");
 		}
 
-		if(events == null) {
+		if(events == null || events.length == 0) {
 			events = new String[1];
 			events[0] = "REGISTER";
 		}

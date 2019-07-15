@@ -1,32 +1,34 @@
 # Keycloak Kafka Module
-Simple module for [Keycloak](https://www.keycloak.org/) to produce JSON events to [Kafka](https://kafka.apache.org/) when a `REGISTER` event in Keycloak was triggered.
-The payload of the kafka event looks like:
-
-`{"userId":"f3e3988a-63eb-49c6-932f-482f37cae74e","email":"testi@mctestface.com"}`
+Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak events to [Kafka](https://kafka.apache.org/).
 
 
-Tested with 
+
+**Tested with** 
 
 Kafka version: `2.12-2.1.0`
- 
-Keycloak version: `4.8.3`
+
+Keycloak version: `4.8.3`, `6.0.1`
 
 Java version: `11`
 
+
+## Build
+
+`mvn clean package`
 
 ## Installation
 
 Add a new provider in `standalone.xml` under `<subsystem xmlns="urn:jboss:domain:keycloak-server:1.1">`.
 
 ```xml
-            <providers>
-                <provider>classpath:${jboss.home.dir}/providers/*</provider>
-                <provider>module:com.github.snuk87.keycloak.keycloak-kafka</provider>
-            </providers>
+<providers>
+    <provider>classpath:${jboss.home.dir}/providers/*</provider>
+    <provider>module:com.github.snuk87.keycloak.keycloak-kafka</provider>
+</providers>
 ```
 
 
-Create a new folder in `$KEYCLOAK_HOME/modules/system/layers/keycloak/ai/atlaslabs/keycloak/keycloak-kafka/main`
+Create a new folder in `$KEYCLOAK_HOME/modules/system/layers/keycloak/com/github/snuk87/keycloak/keycloak-kafka/main`
 
 Copy `keycloak-kafka-1.0.0.jar` into the `main` folder and create a new file `module.xml` with the following content:
 
@@ -89,15 +91,16 @@ Download the .jar files listed under `<resources>` from [MVN Repository](https:/
 Add the following content to your `standalone.xml`:
 
 ```xml
-            <spi name="eventsListener">
-                <provider name="kafka" enabled="true">
-                    <properties>
-                        <property name="topic" value="keycloak"/>
-                        <property name="clientId" value="keycloak"/>
-                        <property name="bootstrapServers" value="192.168.0.1:9092,192.168.0.2:9092"/>
-                    </properties>
-                </provider>
-            </spi>
+<spi name="eventsListener">
+    <provider name="kafka" enabled="true">
+        <properties>
+            <property name="topic" value="keycloak"/>
+            <property name="clientId" value="keycloak"/>
+            <property name="bootstrapServers" value="192.168.0.1:9092,192.168.0.2:9092"/>
+            <property name="events" value="REGISTER,LOGIN,LOGOUT"/>
+        </properties>
+    </provider>
+</spi>
 ```
 
 `topic`: The name of the kafka topic to where the events will be produced to.
@@ -105,3 +108,5 @@ Add the following content to your `standalone.xml`:
 `clientId`: The `client.id` used to identify the client in kafka.
 
 `bootstrapServer`: A comma separated list of available brokers.
+
+`events`: (Optional) The events that should be produced to kafka. If this property is not set then only `REGISTER` events will be produced. 
