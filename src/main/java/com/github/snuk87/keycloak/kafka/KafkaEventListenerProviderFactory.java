@@ -1,4 +1,4 @@
-package ai.atlaslabs.keycloak.kafka;
+package com.github.snuk87.keycloak.kafka;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
@@ -7,20 +7,22 @@ import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class KafkaEventListenerFactory implements EventListenerProviderFactory {
+public class KafkaEventListenerProviderFactory implements EventListenerProviderFactory {
 
-	private static final Logger LOG = Logger.getLogger(KafkaEventListenerFactory.class);
+	private static final Logger LOG = Logger.getLogger(KafkaEventListenerProviderFactory.class);
+	private static final String ID = "kafka";
 
 	private KafkaEventListenerProvider instance;
 
 	private String bootstrapServers;
 	private String topic;
 	private String clientId;
+	private String[] events;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
-			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topic);
+			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topic, events);
 		}
 
 		return instance;
@@ -28,7 +30,7 @@ public class KafkaEventListenerFactory implements EventListenerProviderFactory {
 
 	@Override
 	public String getId() {
-		return "kafka";
+		return ID;
 	}
 
 	@Override
@@ -37,6 +39,7 @@ public class KafkaEventListenerFactory implements EventListenerProviderFactory {
 		topic = config.get("topic");
 		clientId = config.get("clientId", "keycloak");
 		bootstrapServers = config.get("bootstrapServers");
+		events = config.getArray("events");
 
 		if (topic == null) {
 			throw new NullPointerException("topic must not be null.");
@@ -48,6 +51,11 @@ public class KafkaEventListenerFactory implements EventListenerProviderFactory {
 
 		if (bootstrapServers == null) {
 			throw new NullPointerException("bootstrapServers must not be null");
+		}
+
+		if(events == null) {
+			events = new String[1];
+			events[0] = "REGISTER";
 		}
 	}
 

@@ -1,4 +1,4 @@
-package ai.atlaslabs.keycloak.kafka;
+package com.github.snuk87.keycloak.kafka;
 
 import java.util.Properties;
 

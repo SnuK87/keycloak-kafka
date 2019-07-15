@@ -1,1 +1,1 @@
-ai.atlaslabs.keycloak.kafka.KafkaEventListenerFactory
+com.github.snuk87.keycloak.kafka.KafkaEventListenerProviderFactory

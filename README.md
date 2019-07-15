@@ -21,7 +21,7 @@ Add a new provider in `standalone.xml` under `<subsystem xmlns="urn:jboss:domain
 ```xml
             <providers>
                 <provider>classpath:${jboss.home.dir}/providers/*</provider>
-                <provider>module:ai.atlaslabs.keycloak.keycloak-kafka</provider>
+                <provider>module:com.github.snuk87.keycloak.keycloak-kafka</provider>
             </providers>
 ```
 
@@ -32,7 +32,7 @@ Copy `keycloak-kafka-1.0.0.jar` into the `main` folder and create a new file `mo
 
 ```xml
 <?xml version="1.0" ?>
-<module xmlns="urn:jboss:module:1.3" name="ai.atlaslabs.keycloak.keycloak-kafka">
+<module xmlns="urn:jboss:module:1.3" name="com.github.snuk87.keycloak.keycloak-kafka">
  <resources>
   <resource-root path="keycloak-kafka-1.0.0.jar" />
  </resources>

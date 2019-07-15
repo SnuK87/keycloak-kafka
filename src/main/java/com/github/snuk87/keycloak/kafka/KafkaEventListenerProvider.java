@@ -1,5 +1,7 @@
-package ai.atlaslabs.keycloak.kafka;
+package com.github.snuk87.keycloak.kafka;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.kafka.clients.producer.Producer;
@@ -19,27 +21,38 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private String topic;
 
+	private List<EventType> events;
+
 	private Producer<String, String> producer;
 
 	private ObjectMapper mapper;
 
-	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topic) {
+	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topic, String[] events) {
 		this.topic = topic;
+		this.events = new ArrayList<>();
+
+		for(int i = 0; i < events.length; i++) {
+			try {
+				EventType eventType = EventType.valueOf(events[i].toUpperCase());
+				this.events.add(eventType);
+			} catch(IllegalArgumentException e) {
+				LOG.info("Ignoring event >" + events[i] + "<. Event does not exist.");
+			}
+		}
+
 		producer = KafkaProducerFactory.createProducer(clientId, bootstrapServers);
 		mapper = new ObjectMapper();
 	}
 
 	@Override
 	public void onEvent(Event event) {
-		if (event.getType() == EventType.REGISTER) {
-			LOG.info("Received event");
-
-			RegisterEvent registerEvent = new RegisterEvent(event.getUserId(), event.getDetails().get("email"));
+		if(events.contains(event.getType())) {
+			LOG.info("Received event of type: " + event.getType());
 
 			try {
 				LOG.info("Produce to topic: " + topic + " ...");
 				ProducerRecord<String, String> record = new ProducerRecord<>(topic,
-						mapper.writeValueAsString(registerEvent));
+						mapper.writeValueAsString(event));
 				Future<RecordMetadata> metaData = producer.send(record);
 				RecordMetadata recordMetadata = metaData.get();
 				LOG.info("Produced to topic: " + recordMetadata.topic());
