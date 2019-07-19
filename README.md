@@ -1,7 +1,7 @@
 # Keycloak Kafka Module
 Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak events to [Kafka](https://kafka.apache.org/).
 
-
+[TOC]
 
 **Tested with** 
 
@@ -80,7 +80,7 @@ Download the .jar files listed under `<resources>` from [MVN Repository](https:/
 
 ## Configuration
 
-### Enable Events
+### Enable Events in keycloak
 1. Open administration console
 2. Choose realm
 3. Go to Events
@@ -98,6 +98,7 @@ Add the following content to your `standalone.xml`:
             <property name="clientId" value="keycloak"/>
             <property name="bootstrapServers" value="192.168.0.1:9092,192.168.0.2:9092"/>
             <property name="events" value="REGISTER,LOGIN,LOGOUT"/>
+            <property name="enableAdminEvents" value="true"/>
         </properties>
     </provider>
 </spi>
@@ -109,4 +110,37 @@ Add the following content to your `standalone.xml`:
 
 `bootstrapServer`: A comma separated list of available brokers.
 
-`events`: (Optional) The events that should be produced to kafka. If this property is not set then only `REGISTER` events will be produced. 
+`events`: (Optional; default=REGISTER) The events that will be send to kafka.
+
+`enableAdminEvents`: (Optional; default=false) Enables that admin events will be send.
+
+## Sample Client
+
+The following snippet shows a minimal Spring Boot Kafka client to consume keycloak events. Additional properties can be added to `KeycloakEvent`.
+
+```java
+@SpringBootApplication
+public class KafkaConsumerApplication {
+
+	private static final Logger log = LoggerFactory.getLogger(KafkaConsumerApplication.class);
+
+	public static void main(String[] args) {
+		SpringApplication.run(KafkaConsumerApplication.class, args);
+	}
+
+	@KafkaListener(topics = "keycloak", groupId = "event-consumer")
+	public void handleEvent(KeycloakEvent event) {
+		log.info("Consumed event: " + event);
+	}
+
+	@Bean
+	public StringJsonMessageConverter jsonConverter() {
+		return new StringJsonMessageConverter();
+	}
+}
+
+@Data
+class KeycloakEvent {
+	private String userId;
+}
+```

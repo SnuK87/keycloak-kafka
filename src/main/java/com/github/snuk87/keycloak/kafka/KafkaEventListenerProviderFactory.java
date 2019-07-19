@@ -18,11 +18,12 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String topic;
 	private String clientId;
 	private String[] events;
+	private boolean enableAdminEvent;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
-			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topic, events);
+			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topic, events, enableAdminEvent);
 		}
 
 		return instance;
@@ -39,6 +40,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		topic = config.get("topic");
 		clientId = config.get("clientId", "keycloak");
 		bootstrapServers = config.get("bootstrapServers");
+		enableAdminEvent = config.getBoolean("enableAdminEvents", false);
 
 		String eventsString = config.get("events");
 		events = eventsString.split(",");
@@ -55,7 +57,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 			throw new NullPointerException("bootstrapServers must not be null");
 		}
 
-		if(events == null || events.length == 0) {
+		if (events == null || events.length == 0) {
 			events = new String[1];
 			events[0] = "REGISTER";
 		}
@@ -70,5 +72,4 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	public void close() {
 		// ignore
 	}
-
 }

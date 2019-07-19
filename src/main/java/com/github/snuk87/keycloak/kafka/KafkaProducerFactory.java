@@ -21,11 +21,9 @@ public final class KafkaProducerFactory {
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
 		// fix Class org.apache.kafka.common.serialization.StringSerializer could not be
-		// found.
-		// see https://stackoverflow.com/a/50981469
+		// found. see https://stackoverflow.com/a/50981469
 		Thread.currentThread().setContextClassLoader(null);
 
 		return new KafkaProducer<>(props);
 	}
-
 }
