@@ -1,7 +1,13 @@
 # Keycloak Kafka Module
 Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak events to [Kafka](https://kafka.apache.org/).
 
-[TOC]
+- [Keycloak Kafka Module](#keycloak-kafka-module)
+  * [Build](#build)
+  * [Installation](#installation)
+  * [Configuration](#configuration)
+    + [Enable Events in keycloak](#enable-events-in-keycloak)
+    + [Kafka module](#kafka-module)
+  * [Sample Client](#sample-client)
 
 **Tested with** 
 
