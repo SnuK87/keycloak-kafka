@@ -94,17 +94,17 @@ Add the following content to your `standalone.xml`:
 <spi name="eventsListener">
     <provider name="kafka" enabled="true">
         <properties>
-            <property name="topic" value="keycloak"/>
+            <property name="topicEvents" value="keycloak-events"/>
             <property name="clientId" value="keycloak"/>
             <property name="bootstrapServers" value="192.168.0.1:9092,192.168.0.2:9092"/>
             <property name="events" value="REGISTER,LOGIN,LOGOUT"/>
-            <property name="enableAdminEvents" value="true"/>
+            <property name="topicAdminEvents" value="keycloak-admin-events"/>
         </properties>
     </provider>
 </spi>
 ```
 
-`topic`: The name of the kafka topic to where the events will be produced to.
+`topicEvents`: The name of the kafka topic to where the events will be produced to.
 
 `clientId`: The `client.id` used to identify the client in kafka.
 
@@ -112,7 +112,7 @@ Add the following content to your `standalone.xml`:
 
 `events`: (Optional; default=REGISTER) The events that will be send to kafka.
 
-`enableAdminEvents`: (Optional; default=false) Enables that admin events will be send.
+`topicAdminEvents`: (Optional) The name of the kafka topic to where the admin events will be produced to.
 
 ## Sample Client
 
@@ -120,17 +120,21 @@ The following snippet shows a minimal Spring Boot Kafka client to consume keyclo
 
 ```java
 @SpringBootApplication
+@Log4j2
 public class KafkaConsumerApplication {
-
-	private static final Logger log = LoggerFactory.getLogger(KafkaConsumerApplication.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(KafkaConsumerApplication.class, args);
 	}
 
-	@KafkaListener(topics = "keycloak", groupId = "event-consumer")
-	public void handleEvent(KeycloakEvent event) {
+	@KafkaListener(topics = "keycloak-events", groupId = "event-consumer")
+	public void handleKeycloakEvent(KeycloakEvent event) {
 		log.info("Consumed event: " + event);
+	}
+
+	@KafkaListener(topics = "keycloak-admin-events", groupId = "event-consumer")
+	public void handleKeycloakAdminEvent(KeycloakAdminEvent event) {
+		log.info("Consumed admin event: " + event);
 	}
 
 	@Bean
@@ -142,5 +146,12 @@ public class KafkaConsumerApplication {
 @Data
 class KeycloakEvent {
 	private String userId;
+	private String type;
+}
+
+@Data
+class KeycloakAdminEvent {
+	private String realmId;
+	private String operationType;
 }
 ```

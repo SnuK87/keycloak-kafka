@@ -21,21 +21,21 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private static final Logger LOG = Logger.getLogger(KafkaEventListenerProvider.class);
 
-	private String topic;
+	private String topicEvents;
 
 	private List<EventType> events;
 
-	private boolean enableAdminEvents;
+	private String topicAdminEvents;
 
 	private Producer<String, String> producer;
 
 	private ObjectMapper mapper;
 
-	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topic, String[] events,
-			boolean enableAdminEvents) {
-		this.topic = topic;
+	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
+			String topicAdminEvents) {
+		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
-		this.enableAdminEvents = enableAdminEvents;
+		this.topicAdminEvents = topicAdminEvents;
 
 		for (int i = 0; i < events.length; i++) {
 			try {
@@ -50,8 +50,8 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		mapper = new ObjectMapper();
 	}
 
-	private void produceEvent(String eventAsString) throws InterruptedException, ExecutionException {
-		LOG.debug("Produce to topic: " + topic + " ...");
+	private void produceEvent(String eventAsString, String topic) throws InterruptedException, ExecutionException {
+		LOG.debug("Produce to topic: " + topicEvents + " ...");
 		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
 		Future<RecordMetadata> metaData = producer.send(record);
 		RecordMetadata recordMetadata = metaData.get();
@@ -62,7 +62,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	public void onEvent(Event event) {
 		if (events.contains(event.getType())) {
 			try {
-				produceEvent(mapper.writeValueAsString(event));
+				produceEvent(mapper.writeValueAsString(event), topicEvents);
 			} catch (JsonProcessingException | ExecutionException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
@@ -74,9 +74,9 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (enableAdminEvents) {
+		if (topicAdminEvents != null) {
 			try {
-				produceEvent(mapper.writeValueAsString(event));
+				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
 			} catch (JsonProcessingException | ExecutionException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
