@@ -44,7 +44,10 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		topicAdminEvents = config.get("topicAdminEvents");
 
 		String eventsString = config.get("events");
-		events = eventsString.split(",");
+
+		if (eventsString != null) {
+			events = eventsString.split(",");
+		}
 
 		if (topicEvents == null) {
 			throw new NullPointerException("topic must not be null.");
