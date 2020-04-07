@@ -19,12 +19,18 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String topicAdminEvents;
 	private String clientId;
 	private String[] events;
+	private String saslUsername;
+	private String saslPassword;
+	private String saslProtocol;
+	private String saslMechanism;
+	private String sslTruststoreLocation;
+	private String sslTruststorePassword;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
 			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events,
-					topicAdminEvents);
+					topicAdminEvents, saslUsername, saslPassword, saslMechanism, saslProtocol, sslTruststoreLocation, sslTruststorePassword);
 		}
 
 		return instance;
@@ -42,6 +48,12 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		clientId = config.get("clientId", "keycloak");
 		bootstrapServers = config.get("bootstrapServers");
 		topicAdminEvents = config.get("topicAdminEvents");
+		saslUsername = config.get("saslUsername");
+		saslPassword = config.get("saslPassword");
+		saslProtocol = config.get("saslProtocol");
+		saslMechanism = config.get("saslMechanism");
+		sslTruststoreLocation = config.get("sslTruststoreLocation");
+		sslTruststorePassword = config.get("sslTruststorePassword");
 
 		String eventsString = config.get("events");
 
@@ -59,6 +71,30 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 
 		if (bootstrapServers == null) {
 			throw new NullPointerException("bootstrapServers must not be null");
+		}
+
+		if (saslUsername == null) {
+			throw new NullPointerException("saslUsername must not be null");
+		}
+
+		if (saslPassword == null) {
+			throw new NullPointerException("saslPassword must not be null");
+		}
+
+		if (saslProtocol == null) {
+			throw new NullPointerException("saslProtocol must not be null");
+		}
+
+		if (saslMechanism == null) {
+			throw new NullPointerException("saslMechanism must not be null");
+		}
+	
+		if (sslTruststoreLocation == null) {
+			throw new NullPointerException("sslTruststoreLocation must not be null");
+		}
+
+		if (sslTruststorePassword == null) {
+			throw new NullPointerException("sslTruststorePassword must not be null");
 		}
 
 		if (events == null || events.length == 0) {

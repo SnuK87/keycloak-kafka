@@ -32,7 +32,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	private ObjectMapper mapper;
 
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents) {
+			String topicAdminEvents, String saslUsername, String saslPassword, String saslMechanism, String saslProtocol, String sslTruststoreLocation, String sslTruststorePassword) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
@@ -46,7 +46,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 			}
 		}
 
-		producer = KafkaProducerFactory.createProducer(clientId, bootstrapServers);
+		producer = KafkaProducerFactory.createProducer(clientId, bootstrapServers, saslUsername, saslPassword, saslMechanism, saslProtocol, sslTruststoreLocation, sslTruststorePassword);
 		mapper = new ObjectMapper();
 	}
 
