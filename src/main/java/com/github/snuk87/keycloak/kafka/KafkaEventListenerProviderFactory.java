@@ -6,6 +6,7 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 
 public class KafkaEventListenerProviderFactory implements EventListenerProviderFactory {
 
@@ -50,10 +51,33 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		topicAdminEvents = config.get("topicAdminEvents");
 		saslUsername = config.get("saslUsername");
 		saslPassword = config.get("saslPassword");
-		saslProtocol = config.get("saslProtocol");
-		saslMechanism = config.get("saslMechanism");
 		sslTruststoreLocation = config.get("sslTruststoreLocation");
 		sslTruststorePassword = config.get("sslTruststorePassword");
+		switch(config.get("saslProtocol")) {
+			case "Plaintext":
+				saslProtocol = SecurityProtocol.PLAINTEXT.name;
+				break;
+			case "Ssl":
+				saslProtocol = SecurityProtocol.SSL.name;
+				break;
+			case "SaslPlaintext":
+				saslProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
+				break;
+			case "SaslSsl":
+				saslProtocol = SecurityProtocol.SASL_SSL.name;
+				break;
+			default:
+				saslProtocol = null;
+		}
+		switch(saslProtocol) {
+			case "SASL_PLAINTEXT":
+			case "SASL_SSL":
+				saslMechanism = "SCRAM-SHA-512";
+				break;
+			default:
+				saslMechanism = null;
+				break;
+		}
 
 		String eventsString = config.get("events");
 
@@ -82,7 +106,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		}
 
 		if (saslProtocol == null) {
-			throw new NullPointerException("saslProtocol must not be null");
+			throw new NullPointerException("saslProtocol must not be null. Options: Plaintext, Ssl, SaslPlaintext, SaslSsl");
 		}
 
 		if (saslMechanism == null) {
