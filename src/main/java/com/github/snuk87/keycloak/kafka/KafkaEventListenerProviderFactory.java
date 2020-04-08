@@ -51,8 +51,8 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		topicAdminEvents = config.get("topicAdminEvents");
 		saslUsername = config.get("saslUsername");
 		saslPassword = config.get("saslPassword");
-		sslTruststoreLocation = config.get("sslTruststoreLocation");
-		sslTruststorePassword = config.get("sslTruststorePassword");
+		sslTruststoreLocation = config.get("sslTruststoreLocation", "");
+		sslTruststorePassword = config.get("sslTruststorePassword", "");
 		switch(config.get("saslProtocol")) {
 			case "Plaintext":
 				saslProtocol = SecurityProtocol.PLAINTEXT.name;
@@ -68,6 +68,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 				break;
 			default:
 				saslProtocol = null;
+				break;
 		}
 		switch(saslProtocol) {
 			case "SASL_PLAINTEXT":

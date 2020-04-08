@@ -25,9 +25,10 @@ public final class KafkaProducerFactory {
 		props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, saslProtocol);
 		props.put(SaslConfigs.SASL_MECHANISM, saslMechanism);
 		props.put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"" + saslUsername + "\" password=\"" + saslPassword + "\";");
-		props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, sslTruststoreLocation);
-		props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, sslTruststorePassword);
-		props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "JKS");
+		if(!sslTruststoreLocation.isEmpty() && !sslTruststorePassword.isEmpty()) {
+			props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, sslTruststoreLocation);
+			props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, sslTruststorePassword);
+		}
 
 		// fix Class org.apache.kafka.common.serialization.StringSerializer could not be
 		// found. see https://stackoverflow.com/a/50981469
