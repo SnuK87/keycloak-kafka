@@ -24,6 +24,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String saslPassword;
 	private String saslProtocol;
 	private String saslMechanism;
+	private String acks;
 	private String sslTruststoreLocation;
 	private String sslTruststorePassword;
 
@@ -31,7 +32,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
 			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events,
-					topicAdminEvents, saslUsername, saslPassword, saslMechanism, saslProtocol, sslTruststoreLocation, sslTruststorePassword);
+					topicAdminEvents, saslUsername, saslPassword, saslMechanism, saslProtocol, acks, sslTruststoreLocation, sslTruststorePassword);
 		}
 
 		return instance;
@@ -49,34 +50,39 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		clientId = config.get("clientId", "keycloak");
 		bootstrapServers = config.get("bootstrapServers");
 		topicAdminEvents = config.get("topicAdminEvents");
-		saslUsername = config.get("saslUsername");
-		saslPassword = config.get("saslPassword");
+		saslUsername = config.get("saslUsername", "");
+		saslPassword = config.get("saslPassword", "");
 		sslTruststoreLocation = config.get("sslTruststoreLocation", "");
 		sslTruststorePassword = config.get("sslTruststorePassword", "");
-		switch(config.get("saslProtocol")) {
+		saslMechanism = config.get("saslMechanism", "");
+		acks = config.get("acks","");
+		switch(config.get("saslProtocol", "")) {
 			case "Plaintext":
+				saslProtocol = SecurityProtocol.PLAINTEXT.name;
+				break;
+			case "PLAINTEXT":
 				saslProtocol = SecurityProtocol.PLAINTEXT.name;
 				break;
 			case "Ssl":
 				saslProtocol = SecurityProtocol.SSL.name;
 				break;
+			case "SSL":
+				saslProtocol = SecurityProtocol.SSL.name;
+				break;
 			case "SaslPlaintext":
+				saslProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
+				break;
+			case "SASL_PLAINTEXT":
 				saslProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
 				break;
 			case "SaslSsl":
 				saslProtocol = SecurityProtocol.SASL_SSL.name;
 				break;
+			case "SASL_SSL":
+				saslProtocol = SecurityProtocol.SASL_SSL.name;
+				break;
 			default:
 				saslProtocol = null;
-				break;
-		}
-		switch(saslProtocol) {
-			case "SASL_PLAINTEXT":
-			case "SASL_SSL":
-				saslMechanism = "SCRAM-SHA-512";
-				break;
-			default:
-				saslMechanism = null;
 				break;
 		}
 
@@ -120,6 +126,10 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 
 		if (sslTruststorePassword == null) {
 			throw new NullPointerException("sslTruststorePassword must not be null");
+		}
+
+		if (acks == null) {
+			throw new NullPointerException("acks must not be null");
 		}
 
 		if (events == null || events.length == 0) {

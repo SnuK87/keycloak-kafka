@@ -121,6 +121,21 @@ Add the following content to your `standalone.xml`:
 
 `topicAdminEvents`: (Optional) The name of the kafka topic to where the admin events will be produced to.
 
+`acks`: (Optional) The number of acknowledgements the leader broker must receive from all in sync replicas brokers before responding to the request. Options are: *0*, *1* or *all*.
+
+##### Enable Authentication with SASL (and SSL)
+`saslUsername`: SASL username for use with the SASL/PLAIN or SASL/SCRAM-mechanism.
+
+`saslPassword`: SASL password for use with the SASL/PLAIN or SASL/SCRAM-mechanism.
+
+`saslProtocol`: Protocol used to communicate with brokers. Supported: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+
+`saslMechanism`: SASL mechanism to use for authentication. Supported: GSSAPI, PLAIN, SCRAM-SHA-256, SCRAM-SHA-512.
+
+`sslTruststoreLocation`: (Optional) The location of the trust store file. 
+
+`sslTruststorePassword`: (Optional) The password for the trust store file. If a password is not set access to the truststore is still available, but integrity checking is disabled.
+
 
 To automate the configuration of the event listener, it is possible to run the [CLI script](kafka-module.cli) from this repo.
 Make sure to edit the properties to fit your environemnt and use the right server config (default is `standalone-ha`)
