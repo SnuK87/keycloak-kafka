@@ -7,15 +7,16 @@ Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak even
   * [Configuration](#configuration)
     + [Enable Events in keycloak](#enable-events-in-keycloak)
     + [Kafka module](#kafka-module)
+  * [Docker Container](#configuration)  
   * [Sample Client](#sample-client)
 
 **Tested with** 
 
-Kafka version: `2.12-2.1.0`
+Kafka version: `2.12-2.1.x`, `2.12-2.4.x` 
 
-Keycloak version: `4.8.3`, `6.0.1`
+Keycloak version: `4.8.3`, `6.0.x`, `7.0.0`, `9.0.x`
 
-Java version: `11`
+Java version: `11`, `13`
 
 
 ## Build
@@ -119,6 +120,22 @@ Add the following content to your `standalone.xml`:
 `events`: (Optional; default=REGISTER) The events that will be send to kafka.
 
 `topicAdminEvents`: (Optional) The name of the kafka topic to where the admin events will be produced to.
+
+
+To automate the configuration of the event listener, it is possible to run the [CLI script](kafka-module.cli) from this repo.
+Make sure to edit the properties to fit your environemnt and use the right server config (default is `standalone-ha`)
+
+```bash
+$KEYCLOAK_HOME/bin/jboss-cli.sh --file /path/to/kafka-module.cli
+```
+
+## Docker Container
+The simplest way to enable the kafka module in a docker container is to create a custom docker image from the keycloak base image and use the CLI script to configure the kafka module.
+First all .jar files must be added to the image and placed in their module directory as explained in [Installation](#installation). Then the CLI script must be added and placed in 
+the `/opt/jboss/startup-scripts/` directory, so the script will be executed automatically on startup.
+
+An example can be found in this [Dockerfile](Dockerfile). 
+
 
 ## Sample Client
 

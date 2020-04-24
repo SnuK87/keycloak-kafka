@@ -1,0 +1,12 @@
+embed-server --server-config=standalone-ha.xml --std-out=echo
+
+if (outcome != success) of /subsystem=keycloak-server/spi=eventsListener:read-resource()
+    /subsystem=keycloak-server:list-add(name="providers",value="module:com.github.snuk87.keycloak.keycloak-kafka")
+    /subsystem=keycloak-server/spi=eventsListener:add()
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:add(enabled=true)
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.topicEvents,value=keycloak-events)
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.clientId,value=keycloak)
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.bootstrapServers,value=192.168.0.1:9092)
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.events,value=REGISTER)
+end-if
+stop-embedded-server
