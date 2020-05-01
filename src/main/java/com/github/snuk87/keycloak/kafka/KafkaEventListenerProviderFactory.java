@@ -55,7 +55,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		sslTruststoreLocation = config.get("sslTruststoreLocation", "");
 		sslTruststorePassword = config.get("sslTruststorePassword", "");
 		saslMechanism = config.get("saslMechanism", "");
-		acks = config.get("acks","");
+		acks = config.get("acks", "");
 		switch(config.get("saslProtocol", "")) {
 			case "Plaintext":
 				saslProtocol = SecurityProtocol.PLAINTEXT.name;
@@ -82,7 +82,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 				saslProtocol = SecurityProtocol.SASL_SSL.name;
 				break;
 			default:
-				saslProtocol = null;
+				saslProtocol = "";
 				break;
 		}
 
@@ -102,34 +102,6 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 
 		if (bootstrapServers == null) {
 			throw new NullPointerException("bootstrapServers must not be null");
-		}
-
-		if (saslUsername == null) {
-			throw new NullPointerException("saslUsername must not be null");
-		}
-
-		if (saslPassword == null) {
-			throw new NullPointerException("saslPassword must not be null");
-		}
-
-		if (saslProtocol == null) {
-			throw new NullPointerException("saslProtocol must not be null. Options: Plaintext, Ssl, SaslPlaintext, SaslSsl");
-		}
-
-		if (saslMechanism == null) {
-			throw new NullPointerException("saslMechanism must not be null");
-		}
-	
-		if (sslTruststoreLocation == null) {
-			throw new NullPointerException("sslTruststoreLocation must not be null");
-		}
-
-		if (sslTruststorePassword == null) {
-			throw new NullPointerException("sslTruststorePassword must not be null");
-		}
-
-		if (acks == null) {
-			throw new NullPointerException("acks must not be null");
 		}
 
 		if (events == null || events.length == 0) {
