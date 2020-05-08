@@ -22,7 +22,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String[] events;
 	private String saslUsername;
 	private String saslPassword;
-	private String saslProtocol;
+	private String securityProtocol;
 	private String saslMechanism;
 	private String acks;
 	private String sslTruststoreLocation;
@@ -32,7 +32,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
 			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events,
-					topicAdminEvents, saslUsername, saslPassword, saslMechanism, saslProtocol, acks, sslTruststoreLocation, sslTruststorePassword);
+					topicAdminEvents, saslUsername, saslPassword, saslMechanism, securityProtocol, acks, sslTruststoreLocation, sslTruststorePassword);
 		}
 
 		return instance;
@@ -56,33 +56,33 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		sslTruststorePassword = config.get("sslTruststorePassword", "");
 		saslMechanism = config.get("saslMechanism", "");
 		acks = config.get("acks", "");
-		switch(config.get("saslProtocol", "")) {
+		switch(config.get("securityProtocol", "")) {
 			case "Plaintext":
-				saslProtocol = SecurityProtocol.PLAINTEXT.name;
+				securityProtocol = SecurityProtocol.PLAINTEXT.name;
 				break;
 			case "PLAINTEXT":
-				saslProtocol = SecurityProtocol.PLAINTEXT.name;
+				securityProtocol = SecurityProtocol.PLAINTEXT.name;
 				break;
 			case "Ssl":
-				saslProtocol = SecurityProtocol.SSL.name;
+				securityProtocol = SecurityProtocol.SSL.name;
 				break;
 			case "SSL":
-				saslProtocol = SecurityProtocol.SSL.name;
+				securityProtocol = SecurityProtocol.SSL.name;
 				break;
 			case "SaslPlaintext":
-				saslProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
+				securityProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
 				break;
 			case "SASL_PLAINTEXT":
-				saslProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
+				securityProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
 				break;
 			case "SaslSsl":
-				saslProtocol = SecurityProtocol.SASL_SSL.name;
+				securityProtocol = SecurityProtocol.SASL_SSL.name;
 				break;
 			case "SASL_SSL":
-				saslProtocol = SecurityProtocol.SASL_SSL.name;
+				securityProtocol = SecurityProtocol.SASL_SSL.name;
 				break;
 			default:
-				saslProtocol = "";
+				securityProtocol = "";
 				break;
 		}
 

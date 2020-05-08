@@ -128,7 +128,7 @@ Add the following content to your `standalone.xml`:
 
 `saslPassword`: SASL password for use with the SASL/PLAIN or SASL/SCRAM-mechanism.
 
-`saslProtocol`: Protocol used to communicate with brokers. Supported: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+`securityProtocol`: Protocol used to communicate with brokers. Supported: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
 
 `saslMechanism`: SASL mechanism to use for authentication. Supported: GSSAPI, PLAIN, SCRAM-SHA-256, SCRAM-SHA-512.
 
