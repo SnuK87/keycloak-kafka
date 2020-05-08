@@ -6,6 +6,7 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 
 public class KafkaEventListenerProviderFactory implements EventListenerProviderFactory {
 
@@ -19,12 +20,19 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String topicAdminEvents;
 	private String clientId;
 	private String[] events;
+	private String saslUsername;
+	private String saslPassword;
+	private String securityProtocol;
+	private String saslMechanism;
+	private String acks;
+	private String sslTruststoreLocation;
+	private String sslTruststorePassword;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
 			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events,
-					topicAdminEvents);
+					topicAdminEvents, saslUsername, saslPassword, saslMechanism, securityProtocol, acks, sslTruststoreLocation, sslTruststorePassword);
 		}
 
 		return instance;
@@ -42,6 +50,41 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		clientId = config.get("clientId", "keycloak");
 		bootstrapServers = config.get("bootstrapServers");
 		topicAdminEvents = config.get("topicAdminEvents");
+		saslUsername = config.get("saslUsername", "");
+		saslPassword = config.get("saslPassword", "");
+		sslTruststoreLocation = config.get("sslTruststoreLocation", "");
+		sslTruststorePassword = config.get("sslTruststorePassword", "");
+		saslMechanism = config.get("saslMechanism", "");
+		acks = config.get("acks", "");
+		switch(config.get("securityProtocol", "")) {
+			case "Plaintext":
+				securityProtocol = SecurityProtocol.PLAINTEXT.name;
+				break;
+			case "PLAINTEXT":
+				securityProtocol = SecurityProtocol.PLAINTEXT.name;
+				break;
+			case "Ssl":
+				securityProtocol = SecurityProtocol.SSL.name;
+				break;
+			case "SSL":
+				securityProtocol = SecurityProtocol.SSL.name;
+				break;
+			case "SaslPlaintext":
+				securityProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
+				break;
+			case "SASL_PLAINTEXT":
+				securityProtocol = SecurityProtocol.SASL_PLAINTEXT.name;
+				break;
+			case "SaslSsl":
+				securityProtocol = SecurityProtocol.SASL_SSL.name;
+				break;
+			case "SASL_SSL":
+				securityProtocol = SecurityProtocol.SASL_SSL.name;
+				break;
+			default:
+				securityProtocol = "";
+				break;
+		}
 
 		String eventsString = config.get("events");
 
