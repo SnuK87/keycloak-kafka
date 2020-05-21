@@ -1,12 +1,6 @@
-FROM jboss/keycloak:9.0.3
+FROM jboss/keycloak:10.0.1
 
-ADD ./keycloak-module/keycloak-kafka-1.0.0.jar /opt/jboss/keycloak/modules/system/layers/keycloak/com/github/snuk87/keycloak/keycloak-kafka/main/
-ADD ./keycloak-module/module.xml /opt/jboss/keycloak/modules/system/layers/keycloak/com/github/snuk87/keycloak/keycloak-kafka/main/
-ADD ./kafka-clients/kafka-clients-2.2.0.jar /opt/jboss/keycloak/modules/system/layers/keycloak/org/apache/kafka/kafka-clients/main/
-ADD ./kafka-clients/lz4-java-1.5.0.jar /opt/jboss/keycloak/modules/system/layers/keycloak/org/apache/kafka/kafka-clients/main/
-ADD ./kafka-clients/snappy-java-1.1.7.2.jar /opt/jboss/keycloak/modules/system/layers/keycloak/org/apache/kafka/kafka-clients/main/
-ADD ./kafka-clients/zstd-jni-1.3.8-1.jar /opt/jboss/keycloak/modules/system/layers/keycloak/org/apache/kafka/kafka-clients/main/
-ADD ./kafka-clients/module.xml /opt/jboss/keycloak/modules/system/layers/keycloak/org/apache/kafka/kafka-clients/main/
+ADD ./keycloak-kafka-1.0.0-jar-with-dependencies.jar /opt/jboss/keycloak/standalone/deployments/
 
 ADD kafka-module.cli /opt/jboss/startup-scripts/
 
