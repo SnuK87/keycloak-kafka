@@ -24,7 +24,9 @@ Java version: `11`, `13`
 `mvn clean package`
 
 ## Installation
-To install the keycloak-kafka module to your keycloak server you have to first configure the module and then deploy the module.
+First you have to build or [download](https://github.com/SnuK87/keycloak-kafka/releases) the keycloak-kafka module.
+
+To install the module to your keycloak server first you have to configure the module and then deploy the it.
 If you deploy the module without configuration your keycloak server will fail to start up with a NullPointerException.
 
 If you want to install the module manually as described in the initial version you can follow this [guide](https://github.com/SnuK87/keycloak-kafka/wiki/Manual-Installation).
