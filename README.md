@@ -27,6 +27,8 @@ Java version: `11`, `13`
 To install the keycloak-kafka module to your keycloak server you have to first configure the module and then deploy the module.
 If you deploy the module without configuration your keycloak server will fail to start up with a NullPointerException.
 
+If you want to install the module manually as described in the initial version you can follow this [guide](https://github.com/SnuK87/keycloak-kafka/wiki/Manual-Installation).
+
 ### Module configuration
 Download the [CLI script](kafka-module.cli) from this repository and edit the properties to fit your environment. Also make sure that you use the right
 server config (line 1). As a default the script will change the `standalone.xml`.
@@ -52,6 +54,7 @@ $KEYCLOAK_HOME/bin/jboss-cli.sh --file=/path/to/kafka-module.cli
 Copy the `keycloak-kafka-<version>-jar-with-dependencies.jar` into the $KEYCLOAK_HOME/standalone/deployments folder. Keycloak will automatically 
 install the module with all dependencies on start up. To verify that the deployment of the module was successful you can check if a new file 
 with the name `keycloak-kafka-<version>-jar-with-dependencies.jar.deployed` was created in the same folder. 
+
 
 ## Keycloak Configuration
 
