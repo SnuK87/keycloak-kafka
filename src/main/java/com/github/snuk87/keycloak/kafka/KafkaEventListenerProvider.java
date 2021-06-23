@@ -2,8 +2,11 @@ package com.github.snuk87.keycloak.kafka;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -19,75 +22,76 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaEventListenerProvider implements EventListenerProvider {
 
-	private static final Logger LOG = Logger.getLogger(KafkaEventListenerProvider.class);
+    private static final Logger LOG = Logger.getLogger(KafkaEventListenerProvider.class);
 
-	private String topicEvents;
+    private String topicEvents;
 
-	private List<EventType> events;
+    private List<EventType> events;
 
-	private String topicAdminEvents;
+    private String topicAdminEvents;
 
-	private Producer<String, String> producer;
+    private Producer<String, String> producer;
 
-	private ObjectMapper mapper;
+    private ObjectMapper mapper;
 
-	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents) {
-		this.topicEvents = topicEvents;
-		this.events = new ArrayList<>();
-		this.topicAdminEvents = topicAdminEvents;
+    public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
+	    String topicAdminEvents, Map<String, Object> kafkaProducerProperties) {
+	this.topicEvents = topicEvents;
+	this.events = new ArrayList<>();
+	this.topicAdminEvents = topicAdminEvents;
 
-		for (int i = 0; i < events.length; i++) {
-			try {
-				EventType eventType = EventType.valueOf(events[i].toUpperCase());
-				this.events.add(eventType);
-			} catch (IllegalArgumentException e) {
-				LOG.debug("Ignoring event >" + events[i] + "<. Event does not exist.");
-			}
-		}
-
-		producer = KafkaProducerFactory.createProducer(clientId, bootstrapServers);
-		mapper = new ObjectMapper();
+	for (String event : events) {
+	    try {
+		EventType eventType = EventType.valueOf(event.toUpperCase());
+		this.events.add(eventType);
+	    } catch (IllegalArgumentException e) {
+		LOG.debug("Ignoring event >" + event + "<. Event does not exist.");
+	    }
 	}
 
-	private void produceEvent(String eventAsString, String topic) throws InterruptedException, ExecutionException {
-		LOG.debug("Produce to topic: " + topicEvents + " ...");
-		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
-		Future<RecordMetadata> metaData = producer.send(record);
-		RecordMetadata recordMetadata = metaData.get();
-		LOG.debug("Produced to topic: " + recordMetadata.topic());
-	}
+	producer = KafkaProducerFactory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
+	mapper = new ObjectMapper();
+    }
 
-	@Override
-	public void onEvent(Event event) {
-		if (events.contains(event.getType())) {
-			try {
-				produceEvent(mapper.writeValueAsString(event), topicEvents);
-			} catch (JsonProcessingException | ExecutionException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-				Thread.currentThread().interrupt();
-			}
-		}
-	}
+    private void produceEvent(String eventAsString, String topic)
+	    throws InterruptedException, ExecutionException, TimeoutException {
+	LOG.debug("Produce to topic: " + topicEvents + " ...");
+	ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
+	Future<RecordMetadata> metaData = producer.send(record);
+	RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
+	LOG.debug("Produced to topic: " + recordMetadata.topic());
+    }
 
-	@Override
-	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (topicAdminEvents != null) {
-			try {
-				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
-			} catch (JsonProcessingException | ExecutionException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-				Thread.currentThread().interrupt();
-			}
-		}
+    @Override
+    public void onEvent(Event event) {
+	if (events.contains(event.getType())) {
+	    try {
+		produceEvent(mapper.writeValueAsString(event), topicEvents);
+	    } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+		LOG.error(e.getMessage(), e);
+	    } catch (InterruptedException e) {
+		LOG.error(e.getMessage(), e);
+		Thread.currentThread().interrupt();
+	    }
 	}
+    }
 
-	@Override
-	public void close() {
-		// ignore
+    @Override
+    public void onEvent(AdminEvent event, boolean includeRepresentation) {
+	if (topicAdminEvents != null) {
+	    try {
+		produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
+	    } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+		LOG.error(e.getMessage(), e);
+	    } catch (InterruptedException e) {
+		LOG.error(e.getMessage(), e);
+		Thread.currentThread().interrupt();
+	    }
 	}
+    }
+
+    @Override
+    public void close() {
+	// ignore
+    }
 }
