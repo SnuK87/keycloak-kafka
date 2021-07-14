@@ -10,24 +10,24 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 public final class KafkaProducerFactory {
 
-    private KafkaProducerFactory() {
+	private KafkaProducerFactory() {
 
-    }
+	}
 
-    public static Producer<String, String> createProducer(String clientId, String bootstrapServer,
+	public static Producer<String, String> createProducer(String clientId, String bootstrapServer,
 	    Map<String, Object> optionalProperties) {
-	Properties props = new Properties();
-	props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
-	props.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);
-	props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-	props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		Properties props = new Properties();
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
+		props.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);
+		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
-	optionalProperties.forEach(props::put);
+		optionalProperties.forEach(props::put);
 
-	// fix Class org.apache.kafka.common.serialization.StringSerializer could not be
-	// found. see https://stackoverflow.com/a/50981469
-	Thread.currentThread().setContextClassLoader(null);
+		// fix Class org.apache.kafka.common.serialization.StringSerializer could not be
+		// found. see https://stackoverflow.com/a/50981469
+		Thread.currentThread().setContextClassLoader(null);
 
-	return new KafkaProducer<>(props);
-    }
+		return new KafkaProducer<>(props);
+	}
 }

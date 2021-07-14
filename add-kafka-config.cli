@@ -1,0 +1,12 @@
+embed-server --server-config=standalone.xml --std-out=echo
+
+if (outcome != success) of /subsystem=keycloak-server/spi=eventsListener:read-resource()
+    /subsystem=keycloak-server/spi=eventsListener:add()
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:add(enabled=true)
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.topicEvents,value=${env.KAFKA_TOPIC})
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.clientId,value=${env.KAFKA_CLIENT_ID})
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.bootstrapServers,value=${env.KAFKA_BOOTSTRAP_SERVERS})
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:write-attribute(name=properties.events,value=${env.KAFKA_EVENTS})
+    /subsystem=keycloak-server/spi=eventsListener/provider=kafka:map-put(name=properties,key=max.block.ms,value=10000)
+end-if
+stop-embedded-server
