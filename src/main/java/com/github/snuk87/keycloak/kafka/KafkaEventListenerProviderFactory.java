@@ -1,5 +1,7 @@
 package com.github.snuk87.keycloak.kafka;
 
+import java.util.Map;
+
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
@@ -19,12 +21,13 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String topicAdminEvents;
 	private String clientId;
 	private String[] events;
+	private Map<String, Object> kafkaProducerProperties;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
-			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events,
-					topicAdminEvents);
+			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events, topicAdminEvents,
+			    kafkaProducerProperties);
 		}
 
 		return instance;
@@ -65,6 +68,8 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 			events = new String[1];
 			events[0] = "REGISTER";
 		}
+
+		kafkaProducerProperties = KafkaProducerConfig.init(config);
 	}
 
 	@Override

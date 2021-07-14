@@ -1,8 +1,8 @@
-FROM jboss/keycloak:10.0.1
+FROM jboss/keycloak:14.0.0
 
-ADD ./keycloak-kafka-1.0.0-jar-with-dependencies.jar /opt/jboss/keycloak/standalone/deployments/
+ADD ./keycloak-kafka-1.1.0-jar-with-dependencies.jar /opt/jboss/keycloak/standalone/deployments/
 
-ADD kafka-module.cli /opt/jboss/startup-scripts/
+ADD add-kafka-config.cli /opt/jboss/startup-scripts/
 
 #ADD realm-export.json /init/
 
@@ -17,4 +17,4 @@ EXPOSE 8443
 
 ENTRYPOINT [ "/opt/jboss/tools/docker-entrypoint.sh" ]
 
-CMD ["-b", "0.0.0.0", "-Dkeycloak.import=/init/realm-export.json"]
+CMD ["-b", "0.0.0.0"]
