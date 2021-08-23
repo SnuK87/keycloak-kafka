@@ -41,12 +41,12 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	@Override
 	public void init(Scope config) {
 		LOG.info("Init kafka module ...");
-		topicEvents = config.get("topicEvents");
-		clientId = config.get("clientId", "keycloak");
-		bootstrapServers = config.get("bootstrapServers");
-		topicAdminEvents = config.get("topicAdminEvents");
+		topicEvents = config.get("topicEvents", System.getenv("KAFKA_TOPIC"));
+		clientId = config.get("clientId", System.getenv("KAFKA_CLIENT_ID"));
+		bootstrapServers = config.get("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
+		topicAdminEvents = config.get("topicAdminEvents", System.getenv("KAFKA_ADMIN_TOPIC"));
 
-		String eventsString = config.get("events");
+		String eventsString = config.get("events", System.getenv("KAFKA_EVENTS"));
 
 		if (eventsString != null) {
 			events = eventsString.split(",");
