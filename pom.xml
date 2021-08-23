@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.snuk87.keycloak</groupId>
 	<artifactId>keycloak-kafka</artifactId>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
