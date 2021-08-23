@@ -17,7 +17,7 @@ Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak even
 
 Kafka version: `2.12-2.1.x`, `2.12-2.4.x`, `2.12-2.5.x`, `2.13-2.8`
 
-Keycloak version: `4.8.3`, `6.0.x`, `7.0.0`, `9.0.x`, `10.0.x`, `13.0.x`, `14.0.x`
+Keycloak version: `4.8.3`, `6.0.x`, `7.0.0`, `9.0.x`, `10.0.x`, `13.0.x`, `14.0.x` `15.0.x`
 
 Java version: `11`, `13`
 
