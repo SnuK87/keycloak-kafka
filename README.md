@@ -42,7 +42,7 @@ If you want to install the module manually as described in the initial version y
 Download the [CLI script](add-kafka-config.cli) from this repository and edit the properties to fit your environment. Also make sure to use the right
 server config (line 1). As default the script will configure the module in the `standalone.xml`. (Be aware that the docker image uses the `standalone-ha.xml` by default)
 
-The following properties are mandatory and can be set via environment variables (e.g. `${env.KAFKA_TOPIC}`)
+The following properties can be set via environment variables (e.g. `${env.KAFKA_TOPIC}`) or as static values.
 
 `topicEvents`: The name of the kafka topic to where the events will be produced to.
 
@@ -50,7 +50,7 @@ The following properties are mandatory and can be set via environment variables 
 
 `bootstrapServer`: A comma separated list of available brokers.
 
-`events`: (Optional; default=REGISTER) The events that will be send to kafka.
+`events`: The events that will be send to kafka.
 
 `topicAdminEvents`: (Optional) The name of the kafka topic to where the admin events will be produced to. No events will be produced when this property isn't set.
 
@@ -147,3 +147,7 @@ class KeycloakAdminEvent {
 	private String operationType;
 }
 ```
+
+## Contribution
+
+Any kind of contributions are welcome.
