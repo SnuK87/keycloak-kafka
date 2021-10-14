@@ -27,7 +27,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
 			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events, topicAdminEvents,
-					kafkaProducerProperties, new StandardKafkaProducerFactory());
+					kafkaProducerProperties, new KafkaStandardProducerFactory());
 		}
 
 		return instance;
