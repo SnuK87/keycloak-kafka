@@ -35,7 +35,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	private ObjectMapper mapper;
 
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-	    String topicAdminEvents, Map<String, Object> kafkaProducerProperties) {
+			String topicAdminEvents, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
@@ -49,12 +49,12 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 			}
 		}
 
-		producer = KafkaProducerFactory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
+		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
 		mapper = new ObjectMapper();
 	}
 
 	private void produceEvent(String eventAsString, String topic)
-	    throws InterruptedException, ExecutionException, TimeoutException {
+			throws InterruptedException, ExecutionException, TimeoutException {
 		LOG.debug("Produce to topic: " + topicEvents + " ...");
 		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
 		Future<RecordMetadata> metaData = producer.send(record);
