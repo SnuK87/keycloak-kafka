@@ -39,22 +39,22 @@ If you deploy the module without configuration, your keycloak server will fail t
 If you want to install the module manually as described in the initial version you can follow this [guide](https://github.com/SnuK87/keycloak-kafka/wiki/Manual-Installation).
 
 ## Module Configuration
-Download the [CLI script](add-kafka-config.cli) from this repository and edit the properties to fit your environment. Also make sure to use the right
-server config (line 1). As default the script will configure the module in the `standalone.xml`. (Be aware that the docker image uses the `standalone-ha.xml` by default)
-
 The following properties can be set via environment variables (e.g. `${env.KAFKA_TOPIC}`) or as static values.
 
-`topicEvents`: The name of the kafka topic to where the events will be produced to.
+`topicEvents` (env `KAFKA_TOPIC`): The name of the kafka topic to where the events will be produced to.
 
-`clientId`: The `client.id` used to identify the client in kafka.
+`clientId` (env `KAFKA_CLIENT_ID`): The `client.id` used to identify the client in kafka.
 
-`bootstrapServer`: A comma separated list of available brokers.
+`bootstrapServer` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
 
-`events`: The events that will be send to kafka.
+`events` (env `KAFKA_EVENTS`): The events that will be send to kafka.
 
-`topicAdminEvents`: (Optional) The name of the kafka topic to where the admin events will be produced to. No events will be produced when this property isn't set.
+`topicAdminEvents` (env `KAFKA_ADMIN_TOPIC`): (Optional) The name of the kafka topic to where the admin events will be produced to. No events will be produced when this property isn't set.
 
 A list of available events can be found [here](https://www.keycloak.org/docs/latest/server_admin/#event-types)
+
+Download the [CLI script](add-kafka-config.cli) from this repository and edit the properties to fit your environment. Also make sure to use the right
+server config (line 1). As default the script will configure the module in the `standalone.xml`. (Be aware that the docker image uses the `standalone-ha.xml` by default)
 
 Run the CLI script using the following command and check the output on the console. You should see some server logs and lines of `{"outcome" => "success"}`.
 
