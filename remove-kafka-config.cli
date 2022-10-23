@@ -1,6 +1,0 @@
-embed-server --server-config=standalone.xml --std-out=echo
-
-if (outcome == success) of /subsystem=keycloak-server/spi=eventsListener:read-resource()
-    /subsystem=keycloak-server/spi=eventsListener:remove()
-end-if
-stop-embedded-server

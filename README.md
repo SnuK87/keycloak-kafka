@@ -91,7 +91,9 @@ install the module with all it's dependencies on start up.
 ![Admin console config](images/event_config.png)
 
 ## Docker Container
-TODO
+The simplest way to enable the kafka module in a docker container is to create a custom docker image from the keycloak base image. A simple example can be found in the [Dockerfile](Dockerfile).
+When you build this image on your local machine by using `docker build . -t keycloak-kafka`, you can test everything by running the [docker-compose](docker-compose.yml) file on your local machine. 
+This just provides a simple example to show how it's working. Please consider to read [this documentation](https://www.keycloak.org/server/containers) and create your own Dockerfile.
 
 ## Sample Client
 
