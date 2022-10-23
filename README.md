@@ -15,11 +15,13 @@ Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak even
 
 **Tested with** 
 
-Kafka version: `2.12-2.1.x`, `2.12-2.4.x`, `2.12-2.5.x`, `2.13-2.8`
+Kafka version: `2.12-2.1.x`, `2.12-2.4.x`, `2.12-2.5.x`, `2.13-2.8`, `2.13-3.3.x`
 
-Keycloak version: `4.8.3`, `6.0.x`, `7.0.0`, `9.0.x`, `10.0.x`, `13.0.x`, `14.0.x` `15.0.x`
+Keycloak version: `19.0.x`
 
-Java version: `11`, `13`
+Java version: `11`, `17`
+
+Check out [this older version](https://github.com/SnuK87/keycloak-kafka/tree/1.1.1) to run the module on a Wildfly server
 
 
 ## Build
@@ -39,55 +41,43 @@ If you deploy the module without configuration, your keycloak server will fail t
 If you want to install the module manually as described in the initial version you can follow this [guide](https://github.com/SnuK87/keycloak-kafka/wiki/Manual-Installation).
 
 ## Module Configuration
-The following properties can be set via environment variables (e.g. `${env.KAFKA_TOPIC}`) or as static values.
+The following properties can be set via environment variables (e.g. `${KAFKA_TOPIC}`) or as parameters when starting keycloak (e.g. `--spi-events-listener-kafka-topic-events`).
 
-`topicEvents` (env `KAFKA_TOPIC`): The name of the kafka topic to where the events will be produced to.
+- `topicEvents` (env `KAFKA_TOPIC`): The name of the kafka topic to where the events will be produced to.
 
-`clientId` (env `KAFKA_CLIENT_ID`): The `client.id` used to identify the client in kafka.
+- `clientId` (env `KAFKA_CLIENT_ID`): The `client.id` used to identify the client in kafka.
 
-`bootstrapServer` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
+- `bootstrapServer` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
 
-`events` (env `KAFKA_EVENTS`): The events that will be send to kafka.
+- `events` (env `KAFKA_EVENTS`): The events that will be send to kafka.
 
-`topicAdminEvents` (env `KAFKA_ADMIN_TOPIC`): (Optional) The name of the kafka topic to where the admin events will be produced to. No events will be produced when this property isn't set.
+- `topicAdminEvents` (env `KAFKA_ADMIN_TOPIC`): (Optional) The name of the kafka topic to where the admin events will be produced to. No events will be produced when this property isn't set.
 
 A list of available events can be found [here](https://www.keycloak.org/docs/latest/server_admin/#event-types)
 
-Download the [CLI script](add-kafka-config.cli) from this repository and edit the properties to fit your environment. Also make sure to use the right
-server config (line 1). As default the script will configure the module in the `standalone.xml`. (Be aware that the docker image uses the `standalone-ha.xml` by default)
-
-Run the CLI script using the following command and check the output on the console. You should see some server logs and lines of `{"outcome" => "success"}`.
-
-```bash
-$KEYCLOAK_HOME/bin/jboss-cli.sh --file=/path/to/add-kafka-config.cli
-```
-
-If you want to remove the configuration of the keycloak-kafka module from your server you can run [this](remove-kafka-config.cli).
-
 ###  Kafka client configuration
-It's also possible to configure the kafka client by adding parameters to the cli script. This makes it possible to connect this module to a kafka broker that requires SSL/TLS connections.
-For example to change the timeout of how long the producer will block the thread to 10 seconds you just have to add the following line to the cli script.
+It's also possible to configure the kafka client by adding parameters to the keycloak start command. This makes it possible to connect this module to a kafka broker that requires SSL/TLS connections.
+For example to change the timeout of how long the producer will block the thread to 10 seconds you just have to pass the following parameter to the start command.
 
 ```
-/subsystem=keycloak-server/spi=eventsListener/provider=kafka:map-put(name=properties,key=max.block.ms,value=10000)
+./kc.sh start --spi-events-listener-kafka-max-block-ms 10000
 ```
 
-Note the difference of `kafka:map-put` for kafka client parameters compared to `kafka:write-attribute` for module parameters.
 A full list of available configurations can be found in the [official kafka docs](https://kafka.apache.org/documentation/#producerconfigs).
 
 ### Kafka client using secure connection
-As mentioned above the kafka client can be configured through the cli script. To make the kafka open a SSL/TLS secured connection you can add the following lines to the script:
+As mentioned above the kafka client can be configured by passing parameters to the start command. To make kafka open a SSL/TLS secured connection you can add the following parameters:
 
 ```
-/subsystem=keycloak-server/spi=eventsListener/provider=kafka:map-put(name=properties,key=security.protocol,value=SSL)
-/subsystem=keycloak-server/spi=eventsListener/provider=kafka:map-put(name=properties,key=ssl.truststore.location,value=kafka.client.truststore.jks)
-/subsystem=keycloak-server/spi=eventsListener/provider=kafka:map-put(name=properties,key=ssl.truststore.password,value=test1234)
+./kc.sh start \
+  --spi-events-listener-kafka-security-protocol SSL \
+  --spi-events-listener-kafka-ssl-truststore-location kafka.client.truststore.jks \
+  --spi-events-listener-kafka-ssl-truststore-password test1234
 ```
 
 ## Module Deployment
-Copy the `keycloak-kafka-<version>-jar-with-dependencies.jar` into the `$KEYCLOAK_HOME/standalone/deployments` folder. Keycloak will automatically 
-install the module with all it's dependencies on start up. To verify that the deployment of the module was successful you can check if a new file 
-with the name `keycloak-kafka-<version>-jar-with-dependencies.jar.deployed` was created in the same folder. 
+Copy the `keycloak-kafka-<version>-jar-with-dependencies.jar` into the `$KEYCLOAK_HOME/providers` folder. Keycloak will automatically 
+install the module with all it's dependencies on start up.
 
 
 ## Keycloak Configuration
@@ -101,10 +91,7 @@ with the name `keycloak-kafka-<version>-jar-with-dependencies.jar.deployed` was 
 ![Admin console config](images/event_config.png)
 
 ## Docker Container
-The simplest way to enable the kafka module in a docker container is to create a custom docker image from the [keycloak base image](https://hub.docker.com/r/jboss/keycloak/).
-The `keycloak-kafka-<version>-jar-with-dependencies.jar` must be added to the `/standalone/deployments` folder and the CLI script must be added to the `/opt/jboss/startup-scripts/` folder
-as explained in [Installation](#installation). The only difference is that the CLI script will be executed automatically on start up and doesn't have to be executed manually.
-An example can be found in this [Dockerfile](Dockerfile).
+TODO
 
 ## Sample Client
 
