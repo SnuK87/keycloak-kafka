@@ -1,0 +1,41 @@
+version: '3'
+services:
+  keycloak:
+    depends_on:
+      - "kafka"
+    image: keycloak-kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin 
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KAFKA_TOPIC: keycloak-events
+      KAFKA_CLIENT_ID: keycloak
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9094
+    command: start-dev
+    
+  zookeeper:
+    restart: always
+    image: bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:    
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      
+  kafka:
+    depends_on:
+      - "zookeeper"
+    image: bitnami/kafka:latest
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_CFG_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://kafka:9094
+      KAFKA_CFG_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "keycloak-events:1:1"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
