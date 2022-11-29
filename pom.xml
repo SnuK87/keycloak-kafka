@@ -9,7 +9,7 @@
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<keycloak.version>19.0.3</keycloak.version>
+		<keycloak.version>20.0.0</keycloak.version>
 		<kafka.version>3.3.1</kafka.version>
 		<junit.version>5.8.1</junit.version>
 	</properties>
