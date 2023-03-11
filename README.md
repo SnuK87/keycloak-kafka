@@ -17,9 +17,9 @@ Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak even
 
 Kafka version: `2.12-2.1.x`, `2.12-2.4.x`, `2.12-2.5.x`, `2.13-2.8`, `2.13-3.3.x`
 
-Keycloak version: `19.0.x`
+Keycloak version: `19.0.x, 21.0.x`
 
-Java version: `11`, `17`
+Java version: `17`
 
 Check out [this older version](https://github.com/SnuK87/keycloak-kafka/tree/1.1.1) to run the module on a Wildfly server
 
