@@ -47,7 +47,7 @@ The following properties can be set via environment variables (e.g. `${KAFKA_TOP
 
 - `clientId` (env `KAFKA_CLIENT_ID`): The `client.id` used to identify the client in kafka.
 
-- `bootstrapServer` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
+- `bootstrapServers` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
 
 - `events` (env `KAFKA_EVENTS`): The events that will be send to kafka.
 
