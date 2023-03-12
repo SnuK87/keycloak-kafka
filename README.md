@@ -17,9 +17,9 @@ Simple module for [Keycloak](https://www.keycloak.org/) to produce keycloak even
 
 Kafka version: `2.12-2.1.x`, `2.12-2.4.x`, `2.12-2.5.x`, `2.13-2.8`, `2.13-3.3.x`
 
-Keycloak version: `19.0.x`
+Keycloak version: `19.0.x, 21.0.x`
 
-Java version: `11`, `17`
+Java version: `17`
 
 Check out [this older version](https://github.com/SnuK87/keycloak-kafka/tree/1.1.1) to run the module on a Wildfly server
 
@@ -47,7 +47,7 @@ The following properties can be set via environment variables (e.g. `${KAFKA_TOP
 
 - `clientId` (env `KAFKA_CLIENT_ID`): The `client.id` used to identify the client in kafka.
 
-- `bootstrapServer` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
+- `bootstrapServers` (env `KAFKA_BOOTSTRAP_SERVERS`): A comma separated list of available brokers.
 
 - `events` (env `KAFKA_EVENTS`): The events that will be send to kafka.
 
