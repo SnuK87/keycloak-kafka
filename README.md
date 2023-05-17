@@ -56,11 +56,17 @@ The following properties can be set via environment variables (e.g. `${KAFKA_TOP
 A list of available events can be found [here](https://www.keycloak.org/docs/latest/server_admin/#event-types)
 
 ###  Kafka client configuration
-It's also possible to configure the kafka client by adding parameters to the keycloak start command. This makes it possible to connect this module to a kafka broker that requires SSL/TLS connections.
+It's also possible to configure the kafka client with environment variables or by adding parameters to the keycloak start command. This makes it possible to connect this module to a kafka broker that requires SSL/TLS connections.
 For example to change the timeout of how long the producer will block the thread to 10 seconds you just have to pass the following parameter to the start command.
 
-```
+```sh
 ./kc.sh start --spi-events-listener-kafka-max-block-ms 10000
+```
+
+Or set the following environnment variable.
+
+```sh
+KAFKA_MAX_BLOCK_MS=10000
 ```
 
 A full list of available configurations can be found in the [official kafka docs](https://kafka.apache.org/documentation/#producerconfigs).
