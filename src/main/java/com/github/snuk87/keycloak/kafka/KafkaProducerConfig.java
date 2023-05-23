@@ -17,7 +17,7 @@ public class KafkaProducerConfig {
 			String propertyEnv = System.getenv("KAFKA_" + property.name());
 
 			if (property.getName() != null && scope.get(property.getName(), propertyEnv) != null) {
-				propertyMap.put(property.getName(), scope.get(property.getName()));
+				propertyMap.put(property.getName(), scope.get(property.getName(), propertyEnv));
 			}
 		}
 
