@@ -14,8 +14,10 @@ public class KafkaProducerConfig {
 		KafkaProducerProperty[] producerProperties = KafkaProducerProperty.values();
 
 		for (KafkaProducerProperty property : producerProperties) {
-			if (property.getName() != null && scope.get(property.getName()) != null) {
-				propertyMap.put(property.getName(), scope.get(property.getName()));
+			String propertyEnv = System.getenv("KAFKA_" + property.name());
+
+			if (property.getName() != null && scope.get(property.getName(), propertyEnv) != null) {
+				propertyMap.put(property.getName(), scope.get(property.getName(), propertyEnv));
 			}
 		}
 
