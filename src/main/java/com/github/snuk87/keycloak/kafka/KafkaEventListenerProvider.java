@@ -59,13 +59,13 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	private void produceEvent(String eventAsString, String realmName)
 			throws InterruptedException, ExecutionException, TimeoutException {
 
-		List<String> topics = this.kafkaProducerInitializer.GetKafkaTopicsByRealmName(realmName);
+		List<String> topics = this.kafkaProducerInitializer.getKafkaTopicsByRealmName(realmName);
 		ProducerRecord<String, String> record = new ProducerRecord<>(topics.get(0), eventAsString);
-		Future<RecordMetadata> metaData = this.kafkaProducerInitializer.GetKafkaProducerByRealmName(realmName).send(record);
+		Future<RecordMetadata> metaData = this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName).send(record);
 
 		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
 		LOG.info("TOPIC: " + topics.get(0));
-		LOG.info("PRODUCER: " +   this.kafkaProducerInitializer.GetKafkaProducerByRealmName(realmName));
+		LOG.info("PRODUCER: " +   this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName));
 		LOG.info("REALM_NAME: " + realmName);
 	}
 
@@ -74,7 +74,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		if (events.contains(event.getType())) {
 			try {
 				String eventAsString = mapper.writeValueAsString(event);
-				String realmName = keycloakSessionHelper.GetRealmName(eventAsString);
+				String realmName = keycloakSessionHelper.getRealmName(eventAsString);
 				produceEvent(eventAsString, realmName);
 
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
@@ -91,7 +91,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		if (kafkaConfigService.getTopicAdminEvents() != null) {
 			try {
 				String eventAsString = mapper.writeValueAsString(event);
-				String realmName = keycloakSessionHelper.GetRealmName(eventAsString);
+				String realmName = keycloakSessionHelper.getRealmName(eventAsString);
 				produceEvent(eventAsString, realmName);
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);

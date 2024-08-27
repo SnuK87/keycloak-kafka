@@ -50,12 +50,12 @@ public class KafkaProducerInitializer {
         }
     }
 
-    public  List<String>  GetKafkaTopicsByRealmName (String realmName)
+    public  List<String>  getKafkaTopicsByRealmName (String realmName)
     {
         return kafkaTopics.get(realmName);
     }
 
-    public  Producer<String, String>  GetKafkaProducerByRealmName (String realmName)
+    public  Producer<String, String>  getKafkaProducerByRealmName (String realmName)
     {
         return kafkaProducers.get(realmName);
     }

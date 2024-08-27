@@ -40,7 +40,7 @@ public class KeycloakSessionHelper {
 
     }
 
-    public String GetRealmName(String eventAsString) {
+    public String getRealmName(String eventAsString) {
         String realmId = extractRealmId(eventAsString);
         AtomicReference<String> realmNameRef = new AtomicReference<>(null);
         KeycloakModelUtils.runJobInTransaction(keycloakSession.getKeycloakSessionFactory(), (KeycloakSession transactionalSession) -> {
