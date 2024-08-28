@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0
 
 RUN apt update
+RUN apt install ssh -y
 RUN apt install curl -y
 RUN apt install python3 -y
 RUN apt install jq -y
