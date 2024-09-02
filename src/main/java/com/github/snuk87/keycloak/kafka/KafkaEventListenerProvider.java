@@ -59,12 +59,12 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	private void produceEvent(String eventAsString, String realmName)
 			throws InterruptedException, ExecutionException, TimeoutException {
 
-		List<String> topics = this.kafkaProducerInitializer.getKafkaTopicsByRealmName(realmName);
-		ProducerRecord<String, String> record = new ProducerRecord<>(topics.get(0), eventAsString);
+		String topic = this.kafkaProducerInitializer.getKafkaTopicsByRealmName(realmName);
+		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
 		Future<RecordMetadata> metaData = this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName).send(record);
 
 		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
-		LOG.info("TOPIC: " + topics.get(0));
+		LOG.info("TOPIC: " + topic);
 		LOG.info("PRODUCER: " +   this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName));
 		LOG.info("REALM_NAME: " + realmName);
 	}

@@ -39,7 +39,7 @@ class KafkaEventListenerProviderTests {
 		Mockito.when(mockSessionHelper.getRealmName(Mockito.anyString())).thenReturn("realmTest");
 		Mockito.when(kafkaConfigService.getEvents()).thenReturn(new String[]{"REGISTER", "LOGIN"});
 		Mockito.when(kafkaConfigService.getTopicAdminEvents()).thenReturn("event");
-		Mockito.when(kafkaProducerInitializer.getKafkaTopicsByRealmName(Mockito.anyString())).thenReturn(Collections.singletonList("testTopic"));
+		Mockito.when(kafkaProducerInitializer.getKafkaTopicsByRealmName(Mockito.anyString())).thenReturn("testTopic");
 
 
 		listener = new KafkaEventListenerProvider(mockSessionHelper,kafkaConfigService, kafkaProducerInitializer);

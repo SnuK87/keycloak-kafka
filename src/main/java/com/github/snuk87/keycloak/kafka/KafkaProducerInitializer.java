@@ -14,7 +14,7 @@ public class KafkaProducerInitializer {
     private final KafkaConfigService kafkaConfigService;
     private final Map<String, Object> kafkaProducerProperties;
     private final Map<String, Producer<String, String>> kafkaProducers = new HashMap<>();
-    private final Map<String, List<String>> kafkaTopics = new HashMap<>();
+    private final Map<String, String> kafkaTopics = new HashMap<>();
 
     public KafkaProducerInitializer(KafkaProducerFactory factory, KafkaConfigService kafkaConfigService,
                                     Map<String, Object> kafkaProducerProperties) {
@@ -37,10 +37,7 @@ public class KafkaProducerInitializer {
                             kafkaConfigService.getClientId() + "_" + realmName, brokerIp + ":" + brokerPort, kafkaProducerProperties);
 
                     kafkaProducers.put(realmName, producer);
-
-                    List<String> topics = new ArrayList<>();
-                    topics.add(topic);
-                    kafkaTopics.put(realmName, topics);
+                    kafkaTopics.put(realmName, topic);
 
                     LOG.info("Initialized producer for realm: " + realmName + " with topic: " + topic);
                 }
@@ -50,7 +47,7 @@ public class KafkaProducerInitializer {
         }
     }
 
-    public  List<String>  getKafkaTopicsByRealmName (String realmName)
+    public  String  getKafkaTopicsByRealmName (String realmName)
     {
         return kafkaTopics.get(realmName);
     }
