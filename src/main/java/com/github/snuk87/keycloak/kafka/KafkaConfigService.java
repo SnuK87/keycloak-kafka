@@ -9,6 +9,7 @@ import java.util.Base64;
 public class KafkaConfigService {
     private static final String DEFAULT_EVENT_REGISTER = "REGISTER";
     private static final String DEFAULT_EVENT_DELETE_ACCOUNT = "DELETE_ACCOUNT";
+    private static final String DEFAULT_EVENT_LOGIN = "LOGIN";
 
     private final JsonNode configJson;
     private final String topicAdminEvents;
@@ -39,7 +40,7 @@ public class KafkaConfigService {
         if (eventsString != null && !eventsString.isEmpty()) {
             return eventsString.split(",");
         }
-        return new String[]{DEFAULT_EVENT_REGISTER, DEFAULT_EVENT_DELETE_ACCOUNT};
+        return new String[]{DEFAULT_EVENT_REGISTER, DEFAULT_EVENT_DELETE_ACCOUNT, DEFAULT_EVENT_LOGIN};
     }
 
     private JsonNode decodeBase64ToJson(String base64String) {
