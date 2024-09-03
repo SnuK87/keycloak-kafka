@@ -1,26 +1,25 @@
 version: '3'
 services:
   keycloak:
- 
 
-    image: keycloak-kafka
+    image: antiope
     ports:
       - "8080:8080"
     environment:
       KEYCLOAK_ADMIN: admin 
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KAFKA_CLIENT_ID: keycloak
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      KAFKA_CONFIG: Wwp7ICJyZWFsbU5hbWUiOiAicmVhbG0xIiwKICAiYnJva2VySXAiOiAia2Fma2EiLAogICJicm9rZXJQb3J0IjogIjkwOTIiLAogICJ0b3BpYyI6ICJ0b3BpYzEiCn0sCnsgInJlYWxtTmFtZSI6ICJyZWFsbTIiLAogICJicm9rZXJJcCI6ICJrYWZrYTIiLAogICJicm9rZXJQb3J0IjogIjkwOTMiLAogICJ0b3BpYyI6ICJ0b3BpYzIsdG9waWMzIiAgIAp9Cl0KCg==
+      ANTIOPE_CONFIG: Wwp7ICJyZWFsbU5hbWUiOiAicmVhbG0xIiwKICAiYnJva2VySXAiOiAia2Fma2EiLAogICJicm9rZXJQb3J0IjogIjkwOTIiLAogICJ0b3BpYyI6ICJ0b3BpYzEiCn0sCnsgInJlYWxtTmFtZSI6ICJyZWFsbTIiLAogICJicm9rZXJJcCI6ICJrYWZrYSIsCiAgImJyb2tlclBvcnQiOiAiOTA5MiIsCiAgInRvcGljIjogInRvcGljMiIgICAKfQpd
     command: start-dev
     
   zookeeper:
     restart: always
-    image: bitnami/zookeeper:lates
+    image: bitnami/zookeeper:latest
     ports:
       - "2181:2181"
     environment:    
       - ALLOW_ANONYMOUS_LOGIN=yes
+    depends_on:
+      - kafka
       
 
   kafka:
@@ -44,32 +43,6 @@ services:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "sh", "-c", "nc -z -v -w5 localhost 9092" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  kafka2:
-    image: 'confluentinc/cp-kafka:7.2.6'
-    container_name: kafka2
-    ports:
-      - '9093:9092'
-
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_BROKER_ID=2
-      - KAFKA_LISTENERS=PLAINTEXT://:9093
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9093
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
-      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
-      - KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS=5000
-
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "sh", "-c", "nc -z -v -w5 localhost 9093" ]
       interval: 5s
       timeout: 5s
       retries: 5
