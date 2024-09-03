@@ -4,14 +4,14 @@ Antiope is a Keycloak extension that provides Kafka event listener capabilities.
 
 ![index](./doc/index.png)
 
-### Requirements
+## Requirements
 
-Prerequisites
+### Prerequisites
 
--Java 11 or higher
--Maven 3.6 or higher
--A running instance of Keycloak
--Apache Kafka
+- Java 11 or higher
+- Maven 3.6 or higher
+- A running instance of Keycloak
+- Apache Kafka
 
 ### Build
 
