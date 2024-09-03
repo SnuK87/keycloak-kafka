@@ -3,6 +3,7 @@ package com.github.snuk87.keycloak.kafka;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -19,28 +20,32 @@ import org.keycloak.events.admin.AdminEvent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
+import org.keycloak.models.utils.KeycloakModelUtils;
+import java.util.concurrent.atomic.AtomicReference;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private static final Logger LOG = Logger.getLogger(KafkaEventListenerProvider.class);
+	private final List<EventType> events;
+	private final ObjectMapper mapper;
+	private final KafkaConfigService kafkaConfigService;
+	private final KeycloakSessionHelper keycloakSessionHelper;
+	private final KafkaProducerInitializer kafkaProducerInitializer;
 
-	private String topicEvents;
+	public KafkaEventListenerProvider(KeycloakSessionHelper keycloakSessionHelper, KafkaConfigService kafkaConfigService, KafkaProducerInitializer kafkaProducerInitializer) {
 
-	private List<EventType> events;
-
-	private String topicAdminEvents;
-
-	private Producer<String, String> producer;
-
-	private ObjectMapper mapper;
-
-	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
-		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
-		this.topicAdminEvents = topicAdminEvents;
+        this.keycloakSessionHelper =  keycloakSessionHelper;
+		this.kafkaProducerInitializer = kafkaProducerInitializer;
+		this.kafkaConfigService = kafkaConfigService;
+		this.kafkaProducerInitializer.initialize();
+		mapper = new ObjectMapper();
 
-		for (String event : events) {
+		for (String event : kafkaConfigService.getEvents()) {
 			try {
 				EventType eventType = EventType.valueOf(event.toUpperCase());
 				this.events.add(eventType);
@@ -49,24 +54,29 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 			}
 		}
 
-		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
-		mapper = new ObjectMapper();
 	}
 
-	private void produceEvent(String eventAsString, String topic)
+	private void produceEvent(String eventAsString, String realmName)
 			throws InterruptedException, ExecutionException, TimeoutException {
-		LOG.debug("Produce to topic: " + topicEvents + " ...");
+
+		String topic = this.kafkaProducerInitializer.getKafkaTopicsByRealmName(realmName);
 		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
-		Future<RecordMetadata> metaData = producer.send(record);
+		Future<RecordMetadata> metaData = this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName).send(record);
+
 		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
-		LOG.debug("Produced to topic: " + recordMetadata.topic());
+		LOG.info("TOPIC: " + topic);
+		LOG.info("PRODUCER: " +   this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName));
+		LOG.info("REALM_NAME: " + realmName);
 	}
 
 	@Override
 	public void onEvent(Event event) {
 		if (events.contains(event.getType())) {
 			try {
-				produceEvent(mapper.writeValueAsString(event), topicEvents);
+				String eventAsString = mapper.writeValueAsString(event);
+				String realmName = keycloakSessionHelper.getRealmName(eventAsString);
+				produceEvent(eventAsString, realmName);
+
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
@@ -78,9 +88,11 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (topicAdminEvents != null) {
+		if (kafkaConfigService.getTopicAdminEvents() != null) {
 			try {
-				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
+				String eventAsString = mapper.writeValueAsString(event);
+				String realmName = keycloakSessionHelper.getRealmName(eventAsString);
+				produceEvent(eventAsString, realmName);
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
@@ -94,4 +106,5 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	public void close() {
 		// ignore
 	}
+
 }
