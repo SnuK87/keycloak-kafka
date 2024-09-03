@@ -32,9 +32,10 @@ public class KafkaProducerInitializer {
                     String brokerIp = node.get("brokerIp").asText();
                     String brokerPort = node.get("brokerPort").asText();
                     String topic = node.get("topic").asText();
+                    String clientId = node.get("clientId").asText();
 
                     Producer<String, String> producer = factory.createProducer(
-                            kafkaConfigService.getClientId() + "_" + realmName, brokerIp + ":" + brokerPort, kafkaProducerProperties);
+                            clientId, brokerIp + ":" + brokerPort, kafkaProducerProperties);
 
                     kafkaProducers.put(realmName, producer);
                     kafkaTopics.put(realmName, topic);

@@ -13,18 +13,14 @@ public class KafkaConfigService {
 
     private final JsonNode configJson;
     private final String topicAdminEvents;
-    private final String clientId;
     private  String[] events;
 
     public KafkaConfigService( Config.Scope config ) {
 
-        this.clientId = getConfigValue(config, "clientId", "KAFKA_CLIENT_ID")
-                .orElseThrow(() -> new NullPointerException("clientId must not be null."));
-
         this.topicAdminEvents = getConfigValue(config, "topicAdminEvents", "KAFKA_ADMIN_TOPIC")
                 .orElse(null);
 
-        String base64Config = System.getenv("KAFKA_CONFIG");
+        String base64Config = System.getenv("ANTIOPE_CONFIG");
         this.configJson = base64Config != null ? decodeBase64ToJson(base64Config) : null;
 
         String eventsString = getConfigValue(config, "events", "KAFKA_EVENTS").orElse(null);
@@ -60,10 +56,6 @@ public class KafkaConfigService {
 
     public String getTopicAdminEvents() {
         return topicAdminEvents;
-    }
-
-    public String getClientId() {
-        return clientId;
     }
 
     public String[] getEvents() {
