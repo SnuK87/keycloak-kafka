@@ -11,8 +11,16 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<keycloak.version>21.1.1</keycloak.version>
 		<kafka.version>3.4.0</kafka.version>
+		<confluent.version>7.5.0</confluent.version>
 		<junit.version>5.9.2</junit.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -46,6 +54,17 @@
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
 			<version>${kafka.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-schema-registry</artifactId>
+			<version>${confluent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-avro-serializer</artifactId>
+			<version>${confluent.version}</version>
 		</dependency>
 
 		<dependency>
