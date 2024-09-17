@@ -71,6 +71,11 @@ KAFKA_MAX_BLOCK_MS=10000
 
 A full list of available configurations can be found in the [official kafka docs](https://kafka.apache.org/documentation/#producerconfigs).
 
+
+| :warning: WARNING                                                                                                                                                                                                                                                                                           |
+|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Because some environments have difficulties with empty string variables, a workaround for `SSL_ENDPOINT_IDENTIFICATION_ALGORITHM` was implemented. To disable the host name verification set the value to `disabled`. The module will transfer the value to an empty string when creating the kafka client. |
+
 ### Kafka client using secure connection
 As mentioned above the kafka client can be configured by passing parameters to the start command. To make kafka open a SSL/TLS secured connection you can add the following parameters:
 
