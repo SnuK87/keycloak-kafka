@@ -1,4 +1,4 @@
-package com.github.snuk87.keycloak.kafka;
+package com.github.snuk87.keycloak.kafka.spi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.github.snuk87.keycloak.kafka.KafkaProducerFactory;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -16,9 +17,6 @@ import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaEventListenerProvider implements EventListenerProvider {
 
@@ -30,9 +28,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private String topicAdminEvents;
 
-	private Producer<String, String> producer;
-
-	private ObjectMapper mapper;
+	private Producer<String, Object> producer;
 
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
 			String topicAdminEvents, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
@@ -50,13 +46,12 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		}
 
 		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
-		mapper = new ObjectMapper();
 	}
 
-	private void produceEvent(String eventAsString, String topic)
+	private void produceEvent(final Object event, final String topic)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		LOG.debug("Produce to topic: " + topicEvents + " ...");
-		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
+		final ProducerRecord<String, Object> record = new ProducerRecord<>(topic, event);
 		Future<RecordMetadata> metaData = producer.send(record);
 		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
 		LOG.debug("Produced to topic: " + recordMetadata.topic());
@@ -66,22 +61,22 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	public void onEvent(Event event) {
 		if (events.contains(event.getType())) {
 			try {
-				produceEvent(mapper.writeValueAsString(event), topicEvents);
-			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+				this.produceEvent(event, topicEvents);
+			} catch (ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
 				LOG.error(e.getMessage(), e);
 				Thread.currentThread().interrupt();
 			}
-		}
+        }
 	}
 
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
 		if (topicAdminEvents != null) {
 			try {
-				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
-			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+				this.produceEvent(event, topicAdminEvents);
+			} catch (ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
 				LOG.error(e.getMessage(), e);

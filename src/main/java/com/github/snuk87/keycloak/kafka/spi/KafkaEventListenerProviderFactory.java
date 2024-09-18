@@ -1,7 +1,9 @@
-package com.github.snuk87.keycloak.kafka;
+package com.github.snuk87.keycloak.kafka.spi;
 
 import java.util.Map;
 
+import com.github.snuk87.keycloak.kafka.KafkaProducerConfig;
+import com.github.snuk87.keycloak.kafka.KafkaStandardProducerFactory;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
