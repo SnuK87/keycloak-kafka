@@ -4,15 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.snuk87.keycloak</groupId>
 	<artifactId>keycloak-kafka</artifactId>
-	<version>1.1.5</version>
+	<version>1.2.0</version>
 
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<keycloak.version>21.1.1</keycloak.version>
-		<kafka.version>3.4.0</kafka.version>
+		<keycloak.version>25.0.5</keycloak.version>
+		<kafka.version>3.8.0</kafka.version>
 		<confluent.version>7.5.0</confluent.version>
-		<junit.version>5.9.2</junit.version>
+		<junit.version>5.11.0</junit.version>
+		<jboss-logging.version>3.6.1.Final</jboss-logging.version>
 	</properties>
 
 	<repositories>
@@ -47,7 +48,7 @@
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging</artifactId>
-			<version>3.5.0.Final</version>
+			<version>${jboss-logging.version}</version>
 		</dependency>
 
 		<dependency>
