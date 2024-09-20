@@ -2,16 +2,21 @@ version: '3'
 services:
   keycloak:
     depends_on:
-      - "kafka"
+      - kafka
     image: keycloak-kafka
+    build: .
     ports:
       - "8080:8080"
     environment:
       KEYCLOAK_ADMIN: admin 
       KEYCLOAK_ADMIN_PASSWORD: admin
       KAFKA_TOPIC: keycloak-events
+      KAFKA_ADMIN_TOPIC: keycloak-admin-events
       KAFKA_CLIENT_ID: keycloak
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9094
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_VALUE_SERIALIZER_CLASS: io.confluent.kafka.serializers.KafkaAvroSerializer
+      AUTO_REGISTER_SCHEMAS: 'true'
     command: start-dev
     
   zookeeper:
@@ -24,7 +29,7 @@ services:
       
   kafka:
     depends_on:
-      - "zookeeper"
+      - zookeeper
     image: bitnami/kafka:latest
     ports:
       - "9092:9092"
@@ -39,3 +44,44 @@ services:
       ALLOW_PLAINTEXT_LISTENER: "yes"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.3.3
+    restart: always
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    deploy:
+      resources:
+        limits:
+          memory: 512MB
+
+  redpanda-console:
+    image: docker.redpanda.com/vectorized/console:latest
+    restart: always
+    depends_on:
+      - kafka
+    ports:
+      - "9000:8080"
+    environment:
+      SERVER_BASEPATH: /redpanda
+      #METRICSNAMESPACE: redpanda-console
+      KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      KAFKA_SCHEMAREGISTRY_ENABLED: "true"
+      KAFKA_SCHEMAREGISTRY_URLS: "http://schema-registry:8081"
+      CONNECT_ENABLED: "false"
+      CONNECT_CLUSTERS_NAME: connect-cluster
+      CONNECT_CLUSTERS_URL: "http://connect:8083"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+networks:
+  default:
+    name: keycloak-kafka-network

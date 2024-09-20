@@ -2,6 +2,8 @@ package com.github.snuk87.keycloak.kafka;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.keycloak.Config.Scope;
 
 public class KafkaProducerConfig {
@@ -9,8 +11,8 @@ public class KafkaProducerConfig {
   // https://kafka.apache.org/documentation/#producerconfigs
 
   public static Map<String, Object> init(Scope scope) {
-    Map<String, Object> propertyMap = new HashMap<>();
-    KafkaProducerProperty[] producerProperties = KafkaProducerProperty.values();
+    final Map<String, Object> propertyMap = new HashMap<>();
+    final KafkaProducerProperty[] producerProperties = KafkaProducerProperty.values();
 
     for (KafkaProducerProperty property : producerProperties) {
       String propertyEnv = System.getenv("KAFKA_" + property.name());
@@ -27,6 +29,13 @@ public class KafkaProducerConfig {
   }
 
   enum KafkaProducerProperty {
+    KEY_SERIALIZER_CLASS(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG),
+    VALUE_SERIALIZER_CLASS(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG),
+    AUTO_REGISTER_SCHEMAS("auto.register.schemas"),
+    USE_LATEST_VERSION("use.latest.version"),
+    SCHEMA_REGISTRY_URL("schema.registry.url"),
+    SCHEMA_REGISTRY_USER("schema.registry.user"),
+    SCHEMA_REGISTRY_PASSWORD("schema.registry.password"),
     ACKS("acks"), //
     BUFFER_MEMORY("buffer.memory"), //
     COMPRESSION_TYPE("compression.type"), //
