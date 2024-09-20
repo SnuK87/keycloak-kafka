@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.github.snuk87.keycloak.kafka.KafkaProducerFactory;
+import com.github.snuk87.keycloak.kafka.mapper.KeycloakMapper;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -28,7 +30,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private String topicAdminEvents;
 
-	private Producer<String, Object> producer;
+	private Producer<String, SpecificRecordBase> producer;
 
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
 			String topicAdminEvents, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
@@ -48,10 +50,10 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
 	}
 
-	private void produceEvent(final Object event, final String topic)
+	private void produceEvent(final SpecificRecordBase event, final String topic)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		LOG.debug("Produce to topic: " + topicEvents + " ...");
-		final ProducerRecord<String, Object> record = new ProducerRecord<>(topic, event);
+		final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, event);
 		Future<RecordMetadata> metaData = producer.send(record);
 		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
 		LOG.debug("Produced to topic: " + recordMetadata.topic());
@@ -61,7 +63,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	public void onEvent(Event event) {
 		if (events.contains(event.getType())) {
 			try {
-				this.produceEvent(event, topicEvents);
+				this.produceEvent(KeycloakMapper.mapEventToKeycloakEvent(event), topicEvents);
 			} catch (ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {
@@ -75,7 +77,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
 		if (topicAdminEvents != null) {
 			try {
-				this.produceEvent(event, topicAdminEvents);
+				this.produceEvent(KeycloakMapper.mapEventToKeycloakEvent(event), topicAdminEvents);
 			} catch (ExecutionException | TimeoutException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (InterruptedException e) {

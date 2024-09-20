@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.github.snuk87.keycloak.kafka.serializer.JsonSerializer;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -12,8 +13,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public final class KafkaStandardProducerFactory implements KafkaProducerFactory {
 
 	@Override
-	public Producer<String, Object> createProducer(String clientId, String bootstrapServer,
-			Map<String, Object> optionalProperties) {
+	public Producer<String, SpecificRecordBase> createProducer(String clientId, String bootstrapServer,
+															   Map<String, Object> optionalProperties) {
 		Properties props = new Properties();
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
 		props.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);

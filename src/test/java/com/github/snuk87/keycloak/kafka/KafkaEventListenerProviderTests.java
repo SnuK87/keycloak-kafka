@@ -29,6 +29,7 @@ class KafkaEventListenerProviderTests {
 	@Test
 	void shouldProduceEventWhenTypeIsDefined() throws Exception {
 		Event event = new Event();
+		event.setId("1");
 		event.setType(EventType.REGISTER);
 		MockProducer<?, ?> producer = getProducerUsingReflection();
 
@@ -40,6 +41,7 @@ class KafkaEventListenerProviderTests {
 	@Test
 	void shouldDoNothingWhenTypeIsNotDefined() throws Exception {
 		Event event = new Event();
+		event.setId("1");
 		event.setType(EventType.CLIENT_DELETE);
 		MockProducer<?, ?> producer = getProducerUsingReflection();
 
@@ -51,6 +53,7 @@ class KafkaEventListenerProviderTests {
 	@Test
 	void shouldProduceEventWhenTopicAdminEventsIsNotNull() throws Exception {
 		AdminEvent event = new AdminEvent();
+		event.setId("1");
 		MockProducer<?, ?> producer = getProducerUsingReflection();
 
 		listener.onEvent(event, false);
@@ -62,6 +65,7 @@ class KafkaEventListenerProviderTests {
 	void shouldDoNothingWhenTopicAdminEventsIsNull() throws Exception {
 		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, null, Map.of(), factory);
 		AdminEvent event = new AdminEvent();
+		event.setId("1");
 		MockProducer<?, ?> producer = getProducerUsingReflection();
 
 		listener.onEvent(event, false);

@@ -1,1 +1,1 @@
-com.github.snuk87.keycloak.kafka.KafkaEventListenerProviderFactory
+com.github.snuk87.keycloak.kafka.spi.KafkaEventListenerProviderFactory

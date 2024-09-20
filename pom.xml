@@ -84,6 +84,25 @@
 
 	<build>
 		<plugins>
+				<!-- other maven plugins in the project -->
+				<plugin>
+					<groupId>org.apache.avro</groupId>
+					<artifactId>avro-maven-plugin</artifactId>
+					<version>1.12.0</version>
+					<executions>
+						<execution>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>schema</goal>
+							</goals>
+							<configuration>
+								<sourceDirectory>src/main/resources/avro</sourceDirectory>   (5)
+								<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+								<stringType>String</stringType>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>

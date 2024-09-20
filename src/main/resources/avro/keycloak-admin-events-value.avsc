@@ -1,0 +1,137 @@
+{
+    "type": "record",
+    "name": "KeycloakAdminEvent",
+    "namespace": "com.github.snuk87.keycloak.kafka.dto",
+    "fields": [
+        {
+            "name": "authDetails",
+            "type": [
+                "null",
+                {
+                    "type": "record",
+                    "name": "AuthDetails",
+                    "fields": [
+                        {
+                            "name": "clientId",
+                            "type": [
+                                "null",
+                                "string"
+                            ],
+                            "default": null
+                        },
+                        {
+                            "name": "ipAddress",
+                            "type": [
+                                "null",
+                                "string"
+                            ],
+                            "default": null
+                        },
+                        {
+                            "name": "realmId",
+                            "type": [
+                                "null",
+                                "string"
+                            ],
+                            "default": null
+                        },
+                        {
+                            "name": "realmName",
+                            "type": [
+                                "null",
+                                "string"
+                            ],
+                            "default": null
+                        },
+                        {
+                            "name": "userId",
+                            "type": [
+                                "null",
+                                "string"
+                            ],
+                            "default": null
+                        }
+                    ]
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "error",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "operationType",
+            "type": [
+                "null",
+                {
+                    "type": "enum",
+                    "name": "OperationType",
+                    "symbols": [
+                        "CREATE",
+                        "UPDATE",
+                        "DELETE",
+                        "ACTION"
+                    ]
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "realmId",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "realmName",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "representation",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "resourcePath",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "resourceType",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "time",
+            "type": "long"
+        }
+    ]
+}
