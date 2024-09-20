@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "KeycloakEvent",
-  "namespace": "com.github.snuk87.keycloak.kafka.dto",
+  "namespace": "org.keycloak.kafka.dto",
   "fields": [
     {
       "name": "clientId",

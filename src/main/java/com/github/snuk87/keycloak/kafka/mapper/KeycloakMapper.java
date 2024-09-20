@@ -1,13 +1,12 @@
 package com.github.snuk87.keycloak.kafka.mapper;
 
-import com.github.snuk87.keycloak.kafka.dto.AuthDetails;
-import com.github.snuk87.keycloak.kafka.dto.KeycloakAdminEvent;
-import com.github.snuk87.keycloak.kafka.dto.KeycloakEvent;
-import com.github.snuk87.keycloak.kafka.dto.OperationType;
+import org.keycloak.kafka.dto.AuthDetails;
+import org.keycloak.kafka.dto.KeycloakAdminEvent;
+import org.keycloak.kafka.dto.KeycloakEvent;
+import org.keycloak.kafka.dto.OperationType;
 import org.keycloak.events.Event;
 import org.keycloak.events.admin.AdminEvent;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class KeycloakMapper {

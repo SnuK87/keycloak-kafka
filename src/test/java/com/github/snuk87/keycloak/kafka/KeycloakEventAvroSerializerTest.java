@@ -1,8 +1,7 @@
 package com.github.snuk87.keycloak.kafka;
 
-import com.github.snuk87.keycloak.kafka.dto.KeycloakAdminEvent;
+import org.keycloak.kafka.dto.KeycloakAdminEvent;
 import org.apache.avro.Schema;
-import org.apache.kafka.clients.admin.Admin;
 import org.junit.jupiter.api.Test;
 import io.confluent.kafka.schemaregistry.avro.AvroSchemaUtils;
 import org.keycloak.events.Event;
