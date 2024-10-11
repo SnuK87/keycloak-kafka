@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -24,87 +25,111 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
 import org.keycloak.models.utils.KeycloakModelUtils;
+
 import java.util.concurrent.atomic.AtomicReference;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class KafkaEventListenerProvider implements EventListenerProvider {
 
-	private static final Logger LOG = Logger.getLogger(KafkaEventListenerProvider.class);
-	private final List<EventType> events;
-	private final ObjectMapper mapper;
-	private final KafkaConfigService kafkaConfigService;
-	private final KeycloakSessionHelper keycloakSessionHelper;
-	private final KafkaProducerInitializer kafkaProducerInitializer;
+    private static final Logger LOG = Logger.getLogger(KafkaEventListenerProvider.class);
+    private final List<EventType> events;
+    private final ObjectMapper mapper;
+    private final KafkaConfigService kafkaConfigService;
+    private final KeycloakSessionHelper keycloakSessionHelper;
+    private final KafkaProducerInitializer kafkaProducerInitializer;
 
-	public KafkaEventListenerProvider(KeycloakSessionHelper keycloakSessionHelper, KafkaConfigService kafkaConfigService, KafkaProducerInitializer kafkaProducerInitializer) {
+    public KafkaEventListenerProvider(KeycloakSessionHelper keycloakSessionHelper, KafkaConfigService kafkaConfigService, KafkaProducerInitializer kafkaProducerInitializer) {
 
-		this.events = new ArrayList<>();
-        this.keycloakSessionHelper =  keycloakSessionHelper;
-		this.kafkaProducerInitializer = kafkaProducerInitializer;
-		this.kafkaConfigService = kafkaConfigService;
-		this.kafkaProducerInitializer.initialize();
-		mapper = new ObjectMapper();
+        this.events = new ArrayList<>();
+        this.keycloakSessionHelper = keycloakSessionHelper;
+        this.kafkaProducerInitializer = kafkaProducerInitializer;
+        this.kafkaConfigService = kafkaConfigService;
+        this.kafkaProducerInitializer.initialize();
+        mapper = new ObjectMapper();
 
-		for (String event : kafkaConfigService.getEvents()) {
-			try {
-				EventType eventType = EventType.valueOf(event.toUpperCase());
-				this.events.add(eventType);
-			} catch (IllegalArgumentException e) {
-				LOG.debug("Ignoring event >" + event + "<. Event does not exist.");
-			}
-		}
+        for (String event : kafkaConfigService.getEvents()) {
+            try {
+                EventType eventType = EventType.valueOf(event.toUpperCase());
+                this.events.add(eventType);
+            } catch (IllegalArgumentException e) {
+                LOG.debug("Ignoring event >" + event + "<. Event does not exist.");
+            }
+        }
 
-	}
+    }
 
-	private void produceEvent(String eventAsString, String realmName)
-			throws InterruptedException, ExecutionException, TimeoutException {
+    private void produceEvent(String eventAsString, String realmName)
+            throws InterruptedException, ExecutionException, TimeoutException {
 
-		String topic = this.kafkaProducerInitializer.getKafkaTopicsByRealmName(realmName);
-		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
-		Future<RecordMetadata> metaData = this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName).send(record);
+        String topic = this.kafkaProducerInitializer.getKafkaTopicsByRealmName(realmName);
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
+        Future<RecordMetadata> metaData = this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName).send(record);
 
-		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
-		LOG.info("TOPIC: " + topic);
-		LOG.info("PRODUCER: " +   this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName));
-		LOG.info("REALM_NAME: " + realmName);
-	}
+        RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
+        LOG.info("TOPIC: " + topic);
+        LOG.info("PRODUCER: " + this.kafkaProducerInitializer.getKafkaProducerByRealmName(realmName));
+        LOG.info("REALM_NAME: " + realmName);
+    }
 
-	@Override
-	public void onEvent(Event event) {
-		if (events.contains(event.getType())) {
-			try {
-				String eventAsString = mapper.writeValueAsString(event);
-				String realmName = keycloakSessionHelper.getRealmName(eventAsString);
-				produceEvent(eventAsString, realmName);
+    @Override
+    public void onEvent(Event event) {
+        if (events.contains(event.getType())) {
+            try {
+                String eventAsString = mapper.writeValueAsString(event);
+                String realmName = keycloakSessionHelper.getRealmName(eventAsString);
+                UserInfo userInfo = keycloakSessionHelper.getUserInfo(eventAsString);
 
-			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-				Thread.currentThread().interrupt();
-			}
-		}
-	}
+                produceEvent(processInfo(eventAsString, userInfo.serializeToJson()), realmName);
 
-	@Override
-	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (kafkaConfigService.getTopicAdminEvents() != null) {
-			try {
-				String eventAsString = mapper.writeValueAsString(event);
-				String realmName = keycloakSessionHelper.getRealmName(eventAsString);
-				produceEvent(eventAsString, realmName);
-			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-				Thread.currentThread().interrupt();
-			}
-		}
-	}
+            } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                LOG.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
 
-	@Override
-	public void close() {
-		// ignore
-	}
+    @Override
+    public void onEvent(AdminEvent event, boolean includeRepresentation) {
+        if (kafkaConfigService.getTopicAdminEvents() != null) {
+            try {
+                String eventAsString = mapper.writeValueAsString(event);
+                String realmName = keycloakSessionHelper.getRealmName(eventAsString);
+                produceEvent(eventAsString, realmName);
+            } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                LOG.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        // ignore
+    }
+
+    private String processInfo(String event, String userInfo) {
+        if (userInfo != null) {
+            try {
+                JsonNode eventNode = mapper.readTree(event);
+                JsonNode userInfoNode = mapper.readTree(userInfo);
+                JsonNode detailsNode = eventNode.path("details");
+
+                ObjectNode mergedNode = (ObjectNode) detailsNode;
+                mergedNode.setAll((ObjectNode) userInfoNode);
+
+                return mapper.writeValueAsString(eventNode);
+            } catch (JsonProcessingException e) {
+                LOG.error("Failed to parse event JSON", e);
+                return null;
+            }
+        }
+        return event;
+
+    }
 
 }
