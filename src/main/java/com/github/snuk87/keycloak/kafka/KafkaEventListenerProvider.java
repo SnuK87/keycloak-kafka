@@ -34,11 +34,17 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private ObjectMapper mapper;
 
+	private String[] adminEventResourceTypes;
+
+	private String[] adminEventOperationTypes;
+
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
+			String topicAdminEvents, String[] adminEventResourceTypes, String[] adminEventOperationTypes, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
+		this.adminEventResourceTypes = adminEventResourceTypes
+		this.adminEventOperationTypes = adminEventOperationTypes
 
 		for (String event : events) {
 			try {
@@ -78,7 +84,13 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (topicAdminEvents != null) {
+		if (topicAdminEvents != null && 
+		    (this.adminEventResourceTypes == null || 
+			 this.adminEventResourceTypes.length == 0 || 
+			 this.adminEventResourceTypes.contains(event.resourceType)) && 
+			 (this.adminEventOperationTypes == null || 
+			 this.adminEventOperationTypes.length == 0 || 
+			 this.adminEventOperationTypes.contains(event.operationType))) {
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {

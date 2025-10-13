@@ -21,7 +21,7 @@ class KafkaEventListenerProviderTests {
 	@BeforeEach
 	void setUp() throws Exception {
 		factory = new KafkaMockProducerFactory();
-		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin-events", Map.of(),
+		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin-events", new String[] {}, new String[] {}, Map.of(),
 				factory);
 	}
 
@@ -59,7 +59,7 @@ class KafkaEventListenerProviderTests {
 
 	@Test
 	void shouldDoNothingWhenTopicAdminEventsIsNull() throws Exception {
-		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, null, Map.of(), factory);
+		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, null, Map.of(), new String[] {}, new String[] {}, factory);
 		AdminEvent event = new AdminEvent();
 		MockProducer<?, ?> producer = getProducerUsingReflection();
 
