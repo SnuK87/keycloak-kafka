@@ -47,8 +47,16 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		clientId = config.get("clientId", System.getenv("KAFKA_CLIENT_ID"));
 		bootstrapServers = config.get("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
 		topicAdminEvents = config.get("topicAdminEvents", System.getenv("KAFKA_ADMIN_TOPIC"));
-		adminEventResourceTypes = config.get("adminEventResourceTypes", System.getenv("KAFKA_ADMIN_EVENT_RESOURCE_TYPES"));
-		adminEventOperationTypes = config.get("adminEventOperationTypes", System.getenv("KAFKA_ADMIN_EVENT_OPERATION_TYPES"));
+		String adminEventResourceTypesString = config.get("adminEventResourceTypes", System.getenv("KAFKA_ADMIN_EVENT_RESOURCE_TYPES"));
+		String adminEventOperationTypesString = config.get("adminEventOperationTypes", System.getenv("KAFKA_ADMIN_EVENT_OPERATION_TYPES"));
+
+		if (adminEventResourceTypesString != null) {
+			adminEventResourceTypes = adminEventResourceTypesString.split(",");
+		}
+
+		if (adminEventOperationTypesString != null) {
+			adminEventOperationTypes = adminEventOperationTypesString.split(",");
+		}
 
 		String eventsString = config.get("events", System.getenv("KAFKA_EVENTS"));
 

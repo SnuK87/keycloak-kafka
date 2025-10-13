@@ -34,17 +34,17 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private ObjectMapper mapper;
 
-	private String[] adminEventResourceTypes;
+	private List<String> adminEventResourceTypes;
 
-	private String[] adminEventOperationTypes;
+	private List<String> adminEventOperationTypes;
 
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
 			String topicAdminEvents, String[] adminEventResourceTypes, String[] adminEventOperationTypes, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
-		this.adminEventResourceTypes = adminEventResourceTypes
-		this.adminEventOperationTypes = adminEventOperationTypes
+		this.adminEventResourceTypes = new ArrayList<>();
+		this.adminEventOperationTypes = new ArrayList<>();
 
 		for (String event : events) {
 			try {
@@ -53,6 +53,12 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 			} catch (IllegalArgumentException e) {
 				LOG.debug("Ignoring event >" + event + "<. Event does not exist.");
 			}
+		}
+		for (String operationType : adminEventOperationTypes) {
+		  this.adminEventOperationTypes.add(operationType);
+		}
+    for (String resourceType : adminEventResourceTypes) {
+		  this.adminEventResourceTypes.add(resourceType);
 		}
 
 		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
@@ -85,12 +91,12 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
 		if (topicAdminEvents != null && 
-		    (this.adminEventResourceTypes == null || 
-			 this.adminEventResourceTypes.length == 0 || 
-			 this.adminEventResourceTypes.contains(event.resourceType)) && 
-			 (this.adminEventOperationTypes == null || 
-			 this.adminEventOperationTypes.length == 0 || 
-			 this.adminEventOperationTypes.contains(event.operationType))) {
+		    (adminEventResourceTypes == null ||
+		     adminEventResourceTypes.size() == 0 ||
+			 adminEventResourceTypes.contains(event.getResourceTypeAsString())) &&
+			 (adminEventOperationTypes == null ||
+			  adminEventOperationTypes.size() == 0 ||
+			 adminEventOperationTypes.contains(event.getOperationType()))) {
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
