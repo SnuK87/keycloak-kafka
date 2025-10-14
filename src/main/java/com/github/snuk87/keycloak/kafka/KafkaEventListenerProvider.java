@@ -38,13 +38,17 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private List<String> adminEventOperationTypes;
 
+	private List<String> adminStrictEventTypes;
+
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents, String[] adminEventResourceTypes, String[] adminEventOperationTypes, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
+			String topicAdminEvents, String[] adminEventResourceTypes, String[] adminEventOperationTypes, String[] adminStrictEventTypes,
+			Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
 		this.adminEventResourceTypes = new ArrayList<>();
 		this.adminEventOperationTypes = new ArrayList<>();
+		this.adminStrictEventTypes = new ArrayList<>();
 
 		for (String event : events) {
 			try {
@@ -59,6 +63,9 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		}
     for (String resourceType : adminEventResourceTypes) {
 		  this.adminEventResourceTypes.add(resourceType);
+		}
+    for (String strictEventType : adminStrictEventTypes) {
+		  this.adminStrictEventTypes.add(strictEventType);
 		}
 
 		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
@@ -88,15 +95,67 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		}
 	}
 
+  private boolean shouldProcessAdminEvent(AdminEvent event) {
+    if (topicAdminEvents == null) {
+      return false;
+    }
+
+    // Strict matching: both operation type AND resource type must match
+    if (adminStrictEventTypes != null && !adminStrictEventTypes.isEmpty()) {
+      return matchesStrictEventTypes(event);
+    }
+
+    // Flexible matching: either operation type OR resource type can match
+    return matchesFlexibleEventTypes(event);
+  }
+
+  private boolean matchesStrictEventTypes(AdminEvent event) {
+    if (event.getOperationType() == null) {
+      return false;
+    }
+
+    String eventOperationType = event.getOperationType().name();
+    String eventResourceType = event.getResourceTypeAsString();
+
+    for (String eventType : adminStrictEventTypes) {
+      String[] parts = eventType.split("__", 2); // Limit split to 2 parts
+      if (parts.length < 2) {
+        continue;
+      }
+
+      if (parts[0].equals(eventOperationType) && parts[1].equals(eventResourceType)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private boolean matchesFlexibleEventTypes(AdminEvent event) {
+    boolean resourceTypesNotSet = adminEventResourceTypes == null || adminEventResourceTypes.isEmpty();
+    boolean operationTypesNotSet = adminEventOperationTypes == null || adminEventOperationTypes.isEmpty();
+
+    // If both filters are empty, accept all events
+    if (resourceTypesNotSet && operationTypesNotSet) {
+      return true;
+    }
+
+    boolean resourceTypeMatches = !resourceTypesNotSet &&
+                                  adminEventResourceTypes.contains(event.getResourceTypeAsString());
+
+    boolean operationTypeMatches = !operationTypesNotSet &&
+                                   event.getOperationType() != null &&
+                                   adminEventOperationTypes.contains(event.getOperationType().name());
+
+    // Accept if either filter matches (when only one filter is set) or both match (when both are set)
+    return (resourceTypesNotSet && operationTypeMatches) ||
+           (operationTypesNotSet && resourceTypeMatches) ||
+           (resourceTypeMatches && operationTypeMatches);
+  }
+
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (topicAdminEvents != null && 
-		    (adminEventResourceTypes == null ||
-		     adminEventResourceTypes.size() == 0 ||
-			 adminEventResourceTypes.contains(event.getResourceTypeAsString())) &&
-			 (adminEventOperationTypes == null ||
-			  adminEventOperationTypes.size() == 0 ||
-			 adminEventOperationTypes.contains(event.getOperationType()))) {
+		if (shouldProcessAdminEvent(event)) {
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
