@@ -9,8 +9,8 @@
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<keycloak.version>26.3.2</keycloak.version>
-		<kafka.version>3.9.1</kafka.version>
+		<keycloak.version>26.4.5</keycloak.version>
+		<kafka.version>4.1.1</kafka.version>
 		<junit.version>5.13.4</junit.version>
 		<jboss-logging.version>3.6.1.Final</jboss-logging.version>
 	</properties>
