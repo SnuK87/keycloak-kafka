@@ -53,14 +53,11 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 	private void produceEvent(String eventAsString, String topic) {
 		LOG.debug("Produce to topic: " + topic + " ...");
 		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
-		producer.send(record, new Callback() {
-			@Override
-			public void onCompletion(RecordMetadata metadata, Exception exception) {
-				if (exception != null) {
-					LOG.error("Failed to send event to Kafka topic " + topic + ": " + exception.getMessage(), exception);
-				} else {
-					LOG.debug("Produced to topic: " + metadata.topic());
-				}
+		producer.send(record, (metadata, exception) -> {
+			if (exception != null) {
+				LOG.error("Failed to send event to Kafka topic " + topic + ": " + exception.getMessage(), exception);
+			} else {
+				LOG.debug("Produced to topic: " + metadata.topic());
 			}
 		});
 	}

@@ -83,13 +83,7 @@ class KafkaEventListenerProviderTests {
 		// Create a non-auto-completing MockProducer to simulate Kafka unavailability
 		MockProducer<String, String> slowProducer = new MockProducer<>(false, new StringSerializer(), new StringSerializer());
 		
-		KafkaProducerFactory slowFactory = new KafkaProducerFactory() {
-			@Override
-			public Producer<String, String> createProducer(String clientId, String bootstrapServer,
-					Map<String, Object> optionalProperties) {
-				return slowProducer;
-			}
-		};
+		KafkaProducerFactory slowFactory = (clientId, bootstrapServer, optionalProperties) -> slowProducer;
 		
 		KafkaEventListenerProvider slowListener = new KafkaEventListenerProvider("", "", "", 
 				new String[] { "REGISTER" }, "admin-events", Map.of(), slowFactory);
