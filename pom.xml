@@ -9,7 +9,7 @@
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
-		<keycloak.version>26.4.6</keycloak.version>
+		<keycloak.version>26.4.7</keycloak.version>
 		<kafka.version>4.1.1</kafka.version>
 		<junit.version>6.0.1</junit.version>
 		<jboss-logging.version>3.6.1.Final</jboss-logging.version>
