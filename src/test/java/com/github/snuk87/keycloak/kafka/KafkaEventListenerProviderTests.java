@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.MockProducer;
-import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.RoundRobinPartitioner;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class KafkaEventListenerProviderTests {
 	private KafkaProducerFactory factory;
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		factory = new KafkaMockProducerFactory();
 		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin-events", Map.of(),
 				factory);
