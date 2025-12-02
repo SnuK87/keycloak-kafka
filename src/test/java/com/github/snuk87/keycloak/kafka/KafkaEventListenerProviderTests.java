@@ -81,7 +81,8 @@ class KafkaEventListenerProviderTests {
 	@Test
 	void shouldNotBlockWhenKafkaIsUnavailable() throws Exception {
 		// Create a non-auto-completing MockProducer to simulate Kafka unavailability
-		MockProducer<String, String> slowProducer = new MockProducer<>(false, new StringSerializer(), new StringSerializer());
+		MockProducer<String, String> slowProducer = new MockProducer<>(false, new RoundRobinPartitioner(), new StringSerializer(), new StringSerializer());
+
 		
 		KafkaProducerFactory slowFactory = (clientId, bootstrapServer, optionalProperties) -> slowProducer;
 		
