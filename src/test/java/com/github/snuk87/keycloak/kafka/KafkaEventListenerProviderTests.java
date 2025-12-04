@@ -77,7 +77,7 @@ class KafkaEventListenerProviderTests {
 	}
 
 	@Test
-	void shouldProduceEventForMatchingEvent_whenStrictEventMatchingFilterApplied() throws Exception {
+	void shouldProduceEventForMatchingEventWhenStrictEventMatchingFilterApplied() throws Exception {
 
 		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin_events", new String[] {"CREATE__GROUP_MEMBERSHIP"}, Map.of(), factory);
     MockProducer<?, ?> producer = getProducerUsingReflection();
