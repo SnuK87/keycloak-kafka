@@ -31,11 +31,15 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private ObjectMapper mapper;
 
+	private List<String> adminStrictEventTypes;
+
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents, Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
+			String topicAdminEvents, String[] adminStrictEventTypes,
+			Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
+		this.adminStrictEventTypes = new ArrayList<>();
 
 		for (String event : events) {
 			try {
@@ -44,6 +48,9 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 			} catch (IllegalArgumentException e) {
 				LOG.debug("Ignoring event >" + event + "<. Event does not exist.");
 			}
+		}
+    for (String strictEventType : adminStrictEventTypes) {
+		  this.adminStrictEventTypes.add(strictEventType);
 		}
 
 		producer = factory.createProducer(clientId, bootstrapServers, kafkaProducerProperties);
@@ -73,9 +80,44 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		}
 	}
 
+  private boolean shouldProcessAdminEvent(AdminEvent event) {
+    if (topicAdminEvents == null) {
+      return false;
+    }
+
+    // Strict matching: both operation type AND resource type must match
+    if (adminStrictEventTypes != null && !adminStrictEventTypes.isEmpty()) {
+      return matchesStrictEventTypes(event);
+    }
+
+    return true;
+  }
+
+  private boolean matchesStrictEventTypes(AdminEvent event) {
+    if (event.getOperationType() == null) {
+      return false;
+    }
+
+    String eventOperationType = event.getOperationType().name();
+    String eventResourceType = event.getResourceTypeAsString();
+
+    for (String eventType : adminStrictEventTypes) {
+      String[] parts = eventType.split("__", 2); // Limit split to 2 parts
+      if (parts.length < 2) {
+        continue;
+      }
+
+      if (parts[0].equals(eventOperationType) && parts[1].equals(eventResourceType)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 	@Override
 	public void onEvent(AdminEvent event, boolean includeRepresentation) {
-		if (topicAdminEvents != null) {
+		if (shouldProcessAdminEvent(event)) {
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
 			} catch (JsonProcessingException e) {

@@ -21,12 +21,13 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String topicAdminEvents;
 	private String clientId;
 	private String[] events;
+	private String[] adminStrictEventTypes;
 	private Map<String, Object> kafkaProducerProperties;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
-			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events, topicAdminEvents,
+			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events, topicAdminEvents, adminStrictEventTypes,
 					kafkaProducerProperties, new KafkaStandardProducerFactory());
 		}
 
@@ -45,6 +46,11 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		clientId = config.get("clientId", System.getenv("KAFKA_CLIENT_ID"));
 		bootstrapServers = config.get("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
 		topicAdminEvents = config.get("topicAdminEvents", System.getenv("KAFKA_ADMIN_TOPIC"));
+		String adminStrictEventTypesString = config.get("adminStrictEventTypes", System.getenv("KAFKA_ADMIN_EVENT_STRICT_TYPES"));
+
+		if (adminStrictEventTypesString != null) {
+			adminStrictEventTypes = adminStrictEventTypesString.split(",");
+		}
 
 		String eventsString = config.get("events", System.getenv("KAFKA_EVENTS"));
 

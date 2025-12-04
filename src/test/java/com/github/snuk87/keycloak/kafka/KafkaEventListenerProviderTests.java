@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.events.admin.ResourceType;
+import org.keycloak.events.admin.OperationType;
 
 class KafkaEventListenerProviderTests {
 
@@ -25,7 +27,7 @@ class KafkaEventListenerProviderTests {
 	@BeforeEach
 	void setUp() {
 		factory = new KafkaMockProducerFactory();
-		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin-events", Map.of(),
+		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin-events", new String[] {}, Map.of(),
 				factory);
 	}
 
@@ -63,7 +65,7 @@ class KafkaEventListenerProviderTests {
 
 	@Test
 	void shouldDoNothingWhenTopicAdminEventsIsNull() throws Exception {
-		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, null, Map.of(), factory);
+		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, null, new String[] {}, Map.of(), factory);
 		AdminEvent event = new AdminEvent();
 		MockProducer<?, ?> producer = getProducerUsingReflection();
 
@@ -83,34 +85,55 @@ class KafkaEventListenerProviderTests {
 		// Create a non-auto-completing MockProducer to simulate Kafka unavailability
 		MockProducer<String, String> slowProducer = new MockProducer<>(false, new RoundRobinPartitioner(), new StringSerializer(), new StringSerializer());
 
-		
+
 		KafkaProducerFactory slowFactory = (clientId, bootstrapServer, optionalProperties) -> slowProducer;
-		
-		KafkaEventListenerProvider slowListener = new KafkaEventListenerProvider("", "", "", 
-				new String[] { "REGISTER" }, "admin-events", Map.of(), slowFactory);
-		
+
+		KafkaEventListenerProvider slowListener = new KafkaEventListenerProvider("", "", "",
+				new String[] { "REGISTER" }, "admin-events", new String[] {}, Map.of(), slowFactory);
+
 		Event event = new Event();
 		event.setType(EventType.REGISTER);
-		
+
 		// Track execution time - should return almost immediately (non-blocking)
 		CountDownLatch latch = new CountDownLatch(1);
 		long startTime = System.currentTimeMillis();
-		
+
 		Thread eventThread = new Thread(() -> {
 			slowListener.onEvent(event);
 			latch.countDown();
 		});
 		eventThread.start();
-		
+
 		// Wait max 1 second for the method to return (it should be nearly instant)
 		boolean completed = latch.await(1, TimeUnit.SECONDS);
 		long elapsed = System.currentTimeMillis() - startTime;
-		
+
 		assertTrue(completed, "onEvent should return immediately without blocking");
 		assertTrue(elapsed < 1000, "onEvent took too long: " + elapsed + "ms - it should be non-blocking");
-		
+
 		// Verify the message was queued (even though not yet completed)
 		assertEquals(1, slowProducer.history().size());
 	}
 
+	@Test
+	void shouldProduceEventForMatchingEventWhenStrictEventMatchingFilterApplied() throws Exception {
+
+		listener = new KafkaEventListenerProvider("", "", "", new String[] { "REGISTER" }, "admin_events", new String[] {"CREATE__GROUP_MEMBERSHIP"}, Map.of(), factory);
+    MockProducer<?, ?> producer = getProducerUsingReflection();
+
+		AdminEvent matchingEvent = new AdminEvent();
+		matchingEvent.setOperationType(OperationType.CREATE);
+		matchingEvent.setResourceType(ResourceType.GROUP_MEMBERSHIP);
+
+		AdminEvent nonMatchingEvent = new AdminEvent();
+		nonMatchingEvent.setOperationType(OperationType.DELETE);
+		nonMatchingEvent.setResourceType(ResourceType.GROUP_MEMBERSHIP);
+
+		listener.onEvent(matchingEvent, false);
+		listener.onEvent(nonMatchingEvent, false);
+
+		assertEquals(1, producer.history().size());
+		assertTrue(producer.history().get(0).value().toString().contains(String.format("\"operationType\":\"%s\"", matchingEvent.getOperationType().name())));
+		assertTrue(producer.history().get(0).value().toString().contains(String.format("\"resourceType\":\"%s\"", matchingEvent.getResourceTypeAsString())));
+	}
 }
