@@ -21,15 +21,13 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 	private String topicAdminEvents;
 	private String clientId;
 	private String[] events;
-	private String[] adminEventResourceTypes;
-	private String[] adminEventOperationTypes;
 	private String[] adminStrictEventTypes;
 	private Map<String, Object> kafkaProducerProperties;
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
 		if (instance == null) {
-			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events, topicAdminEvents, adminEventResourceTypes, adminEventOperationTypes, adminStrictEventTypes,
+			instance = new KafkaEventListenerProvider(bootstrapServers, clientId, topicEvents, events, topicAdminEvents, adminStrictEventTypes,
 					kafkaProducerProperties, new KafkaStandardProducerFactory());
 		}
 
@@ -48,17 +46,7 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 		clientId = config.get("clientId", System.getenv("KAFKA_CLIENT_ID"));
 		bootstrapServers = config.get("bootstrapServers", System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
 		topicAdminEvents = config.get("topicAdminEvents", System.getenv("KAFKA_ADMIN_TOPIC"));
-		String adminEventResourceTypesString = config.get("adminEventResourceTypes", System.getenv("KAFKA_ADMIN_EVENT_RESOURCE_TYPES"));
-		String adminEventOperationTypesString = config.get("adminEventOperationTypes", System.getenv("KAFKA_ADMIN_EVENT_OPERATION_TYPES"));
 		String adminStrictEventTypesString = config.get("adminStrictEventTypes", System.getenv("KAFKA_ADMIN_EVENT_STRICT_TYPES"));
-
-		if (adminEventResourceTypesString != null) {
-			adminEventResourceTypes = adminEventResourceTypesString.split(",");
-		}
-
-		if (adminEventOperationTypesString != null) {
-			adminEventOperationTypes = adminEventOperationTypesString.split(",");
-		}
 
 		if (adminStrictEventTypesString != null) {
 			adminStrictEventTypes = adminStrictEventTypesString.split(",");

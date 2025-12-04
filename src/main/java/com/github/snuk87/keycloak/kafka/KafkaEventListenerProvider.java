@@ -34,20 +34,14 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	private ObjectMapper mapper;
 
-	private List<String> adminEventResourceTypes;
-
-	private List<String> adminEventOperationTypes;
-
 	private List<String> adminStrictEventTypes;
 
 	public KafkaEventListenerProvider(String bootstrapServers, String clientId, String topicEvents, String[] events,
-			String topicAdminEvents, String[] adminEventResourceTypes, String[] adminEventOperationTypes, String[] adminStrictEventTypes,
+			String topicAdminEvents, String[] adminStrictEventTypes,
 			Map<String, Object> kafkaProducerProperties, KafkaProducerFactory factory) {
 		this.topicEvents = topicEvents;
 		this.events = new ArrayList<>();
 		this.topicAdminEvents = topicAdminEvents;
-		this.adminEventResourceTypes = new ArrayList<>();
-		this.adminEventOperationTypes = new ArrayList<>();
 		this.adminStrictEventTypes = new ArrayList<>();
 
 		for (String event : events) {
@@ -57,12 +51,6 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 			} catch (IllegalArgumentException e) {
 				LOG.debug("Ignoring event >" + event + "<. Event does not exist.");
 			}
-		}
-		for (String operationType : adminEventOperationTypes) {
-		  this.adminEventOperationTypes.add(operationType);
-		}
-    for (String resourceType : adminEventResourceTypes) {
-		  this.adminEventResourceTypes.add(resourceType);
 		}
     for (String strictEventType : adminStrictEventTypes) {
 		  this.adminStrictEventTypes.add(strictEventType);
@@ -105,8 +93,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
       return matchesStrictEventTypes(event);
     }
 
-    // Flexible matching: either operation type OR resource type can match
-    return matchesFlexibleEventTypes(event);
+    return true;
   }
 
   private boolean matchesStrictEventTypes(AdminEvent event) {
@@ -129,28 +116,6 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
     }
 
     return false;
-  }
-
-  private boolean matchesFlexibleEventTypes(AdminEvent event) {
-    boolean resourceTypesNotSet = adminEventResourceTypes == null || adminEventResourceTypes.isEmpty();
-    boolean operationTypesNotSet = adminEventOperationTypes == null || adminEventOperationTypes.isEmpty();
-
-    // If both filters are empty, accept all events
-    if (resourceTypesNotSet && operationTypesNotSet) {
-      return true;
-    }
-
-    boolean resourceTypeMatches = !resourceTypesNotSet &&
-                                  adminEventResourceTypes.contains(event.getResourceTypeAsString());
-
-    boolean operationTypeMatches = !operationTypesNotSet &&
-                                   event.getOperationType() != null &&
-                                   adminEventOperationTypes.contains(event.getOperationType().name());
-
-    // Accept if either filter matches (when only one filter is set) or both match (when both are set)
-    return (resourceTypesNotSet && operationTypeMatches) ||
-           (operationTypesNotSet && resourceTypeMatches) ||
-           (resourceTypeMatches && operationTypeMatches);
   }
 
 	@Override
