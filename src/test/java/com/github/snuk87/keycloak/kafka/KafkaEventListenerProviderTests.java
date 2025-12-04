@@ -89,7 +89,7 @@ class KafkaEventListenerProviderTests {
 		KafkaProducerFactory slowFactory = (clientId, bootstrapServer, optionalProperties) -> slowProducer;
 
 		KafkaEventListenerProvider slowListener = new KafkaEventListenerProvider("", "", "",
-				new String[] { "REGISTER" }, "admin-events", Map.of(), slowFactory);
+				new String[] { "REGISTER" }, "admin-events", new String[] {}, Map.of(), slowFactory);
 
 		Event event = new Event();
 		event.setType(EventType.REGISTER);
