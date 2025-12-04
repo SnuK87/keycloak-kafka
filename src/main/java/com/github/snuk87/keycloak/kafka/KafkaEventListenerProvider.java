@@ -3,11 +3,8 @@ package com.github.snuk87.keycloak.kafka;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -60,13 +57,16 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		mapper = new ObjectMapper();
 	}
 
-	private void produceEvent(String eventAsString, String topic)
-			throws InterruptedException, ExecutionException, TimeoutException {
-		LOG.debug("Produce to topic: " + topicEvents + " ...");
+	private void produceEvent(String eventAsString, String topic) {
+		LOG.debug("Produce to topic: " + topic + " ...");
 		ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
-		Future<RecordMetadata> metaData = producer.send(record);
-		RecordMetadata recordMetadata = metaData.get(30, TimeUnit.SECONDS);
-		LOG.debug("Produced to topic: " + recordMetadata.topic());
+		producer.send(record, (metadata, exception) -> {
+			if (exception != null) {
+				LOG.error("Failed to send event to Kafka topic " + topic + ": " + exception.getMessage(), exception);
+			} else {
+				LOG.debug("Produced to topic: " + metadata.topic());
+			}
+		});
 	}
 
 	@Override
@@ -74,11 +74,8 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		if (events.contains(event.getType())) {
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicEvents);
-			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+			} catch (JsonProcessingException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-				Thread.currentThread().interrupt();
 			}
 		}
 	}
@@ -123,11 +120,8 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 		if (shouldProcessAdminEvent(event)) {
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicAdminEvents);
-			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+			} catch (JsonProcessingException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-				Thread.currentThread().interrupt();
 			}
 		}
 	}
